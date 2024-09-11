@@ -9,8 +9,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        primary: '#191970',
+        dark: '#111111',
+        light: '#f1f1f1',
+      },
+      fontFamily: {
+        raleway: ['Raleway', 'sans-serif'],
       },
     },
   },
