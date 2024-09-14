@@ -1,23 +1,8 @@
-import { initializeApp, getApps } from "firebase/app";
-import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  updateDoc, 
-  getDocs, 
-  query, 
-  where, 
-  limit, 
-  serverTimestamp, 
-  doc, 
-  setDoc, 
-  arrayUnion, 
-  deleteDoc,
-  orderBy,
-  getDoc
-} from 'firebase/firestore';
-import { enableIndexedDbPersistence } from "firebase/firestore";
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getFirestore, collection, query, where, getDocs, limit, addDoc, serverTimestamp, doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { getDatabase } from 'firebase/database';
+import { Timestamp } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -26,331 +11,241 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-console.log('Firebase Config:', firebaseConfig);
+// Ensure Firebase is initialized only once
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const db = getFirestore(app);
+const auth = getAuth(app);
+export const realtimeDb = getDatabase(app);
 
-let app;
-if (!getApps().length) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApps()[0];
+export { app, db, auth };
+
+export interface ProfileUser {
+  id: string;
+  username: string;
+  bio?: string;
+  karma: number; // Ensure this field is present
+  // Add other relevant fields here
 }
 
-export const auth = getAuth(app);
-setPersistence(auth, browserLocalPersistence);
-export const db = getFirestore(app);
-
-// Enable offline persistence
-if (typeof window !== 'undefined') {
-  enableIndexedDbPersistence(db).catch((err) => {
-    if (err.code == 'failed-precondition') {
-      console.log('Multiple tabs open, persistence can only be enabled in one tab at a a time.');
-    } else if (err.code == 'unimplemented') {
-      console.log('The current browser does not support all of the features required to enable persistence');
-    }
-  });
-}
-
-export const createUserProfile = async (userId: string, username: string, email: string, bio: string) => {
-  await setDoc(doc(db, 'users', userId), {
-    username,
-    email,
-    bio,
-    karma: 100, // Starting karma
-    createdAt: serverTimestamp(),
-  });
-};
-
-// Add this new function to add a user to the matching pool
-export const addToMatchingPool = async (userId: string) => {
-  const userDoc = await getDoc(doc(db, 'users', userId));
-  const userKarma = userDoc.data()?.karma || 0;
-
-  await setDoc(doc(db, 'matchingPool', userId), {
-    userId,
-    karma: userKarma,
-    timestamp: serverTimestamp(),
-  });
-};
-
-// Update the findMatch function
-export const findMatch = async () => {
-  const user = ensureAuth();
-  const currentUserId = user.uid;
+export async function getUserByUsername(username: string): Promise<ProfileUser | null> {
+  const usersRef = collection(db, 'users');
+  const q = query(usersRef, where('username', '==', username));
+  
   try {
-    // Get the current user's karma
-    const currentUserDoc = await getDoc(doc(db, 'users', currentUserId));
-    const currentUserKarma = currentUserDoc.data()?.karma || 0;
-
-    const matchingPoolRef = collection(db, 'matchingPool');
-    const q = query(
-      matchingPoolRef,
-      where('userId', '!=', currentUserId),
-      orderBy('karma')
-    );
-
     const querySnapshot = await getDocs(q);
-    
     if (!querySnapshot.empty) {
-      let closestMatch = null;
-      let smallestKarmaDifference = Infinity;
-
-      for (const doc of querySnapshot.docs) {
-        const potentialMatchKarma = doc.data().karma;
-        const karmaDifference = Math.abs(currentUserKarma - potentialMatchKarma);
-
-        if (karmaDifference < smallestKarmaDifference) {
-          smallestKarmaDifference = karmaDifference;
-          closestMatch = doc;
-        }
-      }
-
-      if (closestMatch) {
-        const matchedUserId = closestMatch.data().userId;
-        
-        // Create a new chat
-        const chatId = await createChat(currentUserId, matchedUserId, 'persistent'); // Add 'true' for isLive
-        
-        // Remove both users from the matching pool
-        await removeFromMatchingPool(currentUserId);
-        await removeFromMatchingPool(matchedUserId);
-        
-        // Update both users' documents to add the chat reference
-        await updateDoc(doc(db, 'users', currentUserId), {
-          currentChat: chatId
-        });
-        
-        await updateDoc(doc(db, 'users', matchedUserId), {
-          currentChat: chatId
-        });
-        
-        return { matchedUserId, chatId };
-      }
+      const userDoc = querySnapshot.docs[0];
+      return {
+        id: userDoc.id,
+        username: userDoc.data().username,
+        // Add other relevant fields here
+      } as ProfileUser;
     }
-    
     return null;
   } catch (error) {
-    console.error('Error in findMatch:', error);
-    // Log more details about the error
-    if (error instanceof Error) {
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-    }
+    console.error('Error fetching user:', error);
+    throw error;
+  }
+}
+
+export const sendChatRequest = async (senderId: string, receiverId: string, type: 'oneTime' | 'direct') => {
+  try {
+    // Create a chat request
+    const chatRequestRef = await addDoc(collection(db, 'chatRequests'), {
+      senderId,
+      receiverId,
+      type,
+      status: 'pending',
+      createdAt: serverTimestamp()
+    });
+
+    // Create a notification for the receiver
+    await createNotification(receiverId, 'chatRequest', senderId, chatRequestRef.id);
+
+    console.log('Chat request sent and notification created');
+    return chatRequestRef.id;
+  } catch (error) {
+    console.error('Error sending chat request:', error);
     throw error;
   }
 };
 
-// Update the makeUserAvailable function (we'll rename it to removeFromMatchingPool)
-export const removeFromMatchingPool = async (userId: string) => {
-  await deleteDoc(doc(db, 'matchingPool', userId));
-};
+export const startDirectMessage = async (currentUserId: string, targetUserId: string) => {
+  const chatRef = collection(db, 'chats');
+  const q = query(
+    chatRef,
+    where('participants', 'array-contains', currentUserId)
+  );
 
-export const createChat = async (user1Id: string, user2Id: string, chatType: 'persistent' | 'oneTime') => {
-  const chatData: any = {
-    participants: [user1Id, user2Id],
-    messages: [],
-    chatType,
+  const existingChats = await getDocs(q);
+  const existingChat = existingChats.docs.find(doc => 
+    doc.data().participants.includes(targetUserId)
+  );
+
+  if (existingChat) {
+    return existingChat.id;
+  }
+
+  // Create new chat
+  const newChatRef = await addDoc(chatRef, {
+    participants: [currentUserId, targetUserId],
     createdAt: serverTimestamp(),
-  };
+    lastMessageTimestamp: serverTimestamp()
+  });
 
-  if (chatType === 'oneTime') {
-    const coinFlip = Math.random() < 0.5;
-    chatData.currentTurn = coinFlip ? user1Id : user2Id;
-    chatData.phase = 'initial';
+  return newChatRef.id;
+};
+
+export const acceptChatRequest = async (notificationId: string) => {
+  if (!auth.currentUser) throw new Error('User not authenticated');
+
+  console.log('Accepting chat request for notification:', notificationId);
+
+  const notificationRef = doc(db, 'users', auth.currentUser.uid, 'notifications', notificationId);
+  const notificationSnap = await getDoc(notificationRef);
+
+  if (!notificationSnap.exists()) {
+    console.error('Notification not found:', notificationId);
+    throw new Error('Notification not found');
   }
 
-  const chatRef = await addDoc(collection(db, 'chats'), chatData);
-  return chatRef.id;
-};
+  const notificationData = notificationSnap.data();
+  console.log('Notification data:', notificationData);
 
-// Export the makeUserAvailable function
-export const makeUserAvailable = async (userId: string) => {
-  await updateDoc(doc(db, 'users', userId), {
-    isAvailable: true,
-    currentChat: null
-  });
-};
-
-export const sendMessage = async (chatId: string, userId: string, content: string) => {
-  const chatRef = doc(db, 'chats', chatId);
-  const chatDoc = await getDoc(chatRef);
-
-  if (!chatDoc.exists()) throw new Error('Chat not found');
-
-  const chatData = chatDoc.data();
-  if (chatData.chatType === 'oneTime' && chatData.currentTurn !== userId) {
-    throw new Error('Not your turn');
+  const chatRequestId = notificationData.chatRequestId;
+  if (!chatRequestId) {
+    console.error('Chat request ID not found in notification data');
+    throw new Error('Chat request ID not found');
   }
 
-  const messageData = {
-    sender: userId,
-    content,
-    timestamp: new Date().toISOString(),
-  };
+  const chatRequestRef = doc(db, 'chatRequests', chatRequestId);
+  const chatRequestSnap = await getDoc(chatRequestRef);
 
-  await updateDoc(chatRef, {
-    messages: arrayUnion(messageData),
-  });
-};
-
-export const flipCoin = async (chatId: string) => {
-  const result = Math.random() < 0.5;
-  const chatRef = doc(db, 'chats', chatId);
-  await updateDoc(chatRef, {
-    coinFlipResult: result ? 'Heads' : 'Tails',
-  });
-  return result;
-};
-
-export const endChat = async (chatId: string, userId: string) => {
-  const chatRef = doc(db, 'chats', chatId);
-  await updateDoc(chatRef, {
-    [`endRequests.${userId}`]: true
-  });
-};
-
-export const acceptEndChat = async (chatId: string) => {
-  const chatRef = doc(db, 'chats', chatId);
-  await updateDoc(chatRef, {
-    status: 'ended'
-  });
-};
-
-// Add this to the top of your functions
-const ensureAuth = () => {
-  const auth = getAuth();
-  if (!auth.currentUser) {
-    throw new Error("User not authenticated");
+  if (!chatRequestSnap.exists()) {
+    console.error('Chat request not found:', chatRequestId);
+    throw new Error('Chat request not found');
   }
-  return auth.currentUser;
-};
 
-// Add similar checks to other functions that require authentication
-
-export const requestChat = async (targetUserId: string) => {
-  const user = ensureAuth();
-  const currentUserId = user.uid;
-
-  const chatRequestRef = doc(db, 'chatRequests', `${currentUserId}_${targetUserId}`);
-  await setDoc(chatRequestRef, {
-    from: currentUserId,
-    to: targetUserId,
-    status: 'pending',
-    timestamp: serverTimestamp(),
+  const chatRequestData = chatRequestSnap.data();
+  console.log('Chat request data:', chatRequestData);
+  
+  // Create a new one-time chat
+  const oneTimeChatRef = await addDoc(collection(db, 'oneTimeChats'), {
+    participants: [chatRequestData.senderId, chatRequestData.receiverId],
+    createdAt: serverTimestamp(),
+    status: 'active'
   });
+
+  console.log('One-time chat created:', oneTimeChatRef.id);
+
+  // Update the chat request status
+  await updateDoc(chatRequestRef, { status: 'accepted' });
+
+  // Delete the notification
+  await deleteDoc(notificationRef);
+
+  return oneTimeChatRef.id;
 };
 
-export const getUserOnlineStatus = async (userId: string) => {
+export const getOrCreateDirectChat = async (userId1: string, userId2: string) => {
+  const chatQuery = query(
+    collection(db, 'chats'),
+    where('participants', 'in', [[userId1, userId2], [userId2, userId1]])
+  );
+
+  const chatSnapshot = await getDocs(chatQuery);
+
+  if (!chatSnapshot.empty) {
+    return chatSnapshot.docs[0].id;
+  }
+
+  // Check if both users exist
+  const user1Doc = await getDoc(doc(db, 'users', userId1));
+  const user2Doc = await getDoc(doc(db, 'users', userId2));
+
+  if (!user1Doc.exists() || !user2Doc.exists()) {
+    throw new Error('One or both users not found');
+  }
+
+  const newChatRef = await addDoc(collection(db, 'chats'), {
+    participants: [userId1, userId2],
+    createdAt: serverTimestamp(),
+  });
+
+  return newChatRef.id;
+};
+
+export const getUsernameById = async (userId: string) => {
   const userDoc = await getDoc(doc(db, 'users', userId));
-  return userDoc.data()?.isOnline || false;
-};
-
-export const acceptChatRequest = async (requestId: string) => {
-  const user = ensureAuth();
-  const currentUserId = user.uid;
-
-  const chatRequestRef = doc(db, 'chatRequests', requestId);
-  const chatRequestDoc = await getDoc(chatRequestRef);
-
-  if (!chatRequestDoc.exists() || chatRequestDoc.data().recipientId !== currentUserId) {
-    throw new Error('Invalid chat request');
+  if (userDoc.exists()) {
+    return userDoc.data().username;
   }
-
-  const request = chatRequestDoc.data();
-  const chatId = await createChat(request.senderId, currentUserId, request.chatType);
-
-  await updateDoc(chatRequestRef, { status: 'accepted', chatId });
-  await deleteDoc(chatRequestRef);
-
-  return chatId;
+  throw new Error('User not found');
 };
 
-export const rejectChatRequest = async (requestId: string) => {
-  const user = ensureAuth();
-  const currentUserId = user.uid;
+export const getUserChats = async (userId: string) => {
+  const chatsRef = collection(db, 'chats');
+  const q = query(chatsRef, where('participants', 'array-contains', userId));
+  const querySnapshot = await getDocs(q);
 
-  const chatRequestRef = doc(db, 'chatRequests', requestId);
-  const chatRequestDoc = await getDoc(chatRequestRef);
-
-  if (!chatRequestDoc.exists() || chatRequestDoc.data().recipientId !== currentUserId) {
-    throw new Error('Invalid chat request');
-  }
-
-  await deleteDoc(chatRequestRef);
+  return querySnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
 };
 
-export const sendChatInvitation = async (senderId: string, recipientId: string) => {
-  try {
-    const invitationRef = await addDoc(collection(db, 'chatInvitations'), {
-      senderId,
-      recipientId,
-      status: 'pending',
-      timestamp: serverTimestamp(),
-    });
-
-    await addDoc(collection(db, 'notifications'), {
-      type: 'invitation',
-      senderId,
-      recipientId,
-      invitationId: invitationRef.id,
-      message: 'You have a new chat invitation',
-      timestamp: serverTimestamp(),
-    });
-
-    return invitationRef.id;
-  } catch (error) {
-    console.error('Error sending chat invitation:', error);
-    throw new Error('Failed to send chat invitation. Please try again.');
-  }
-};
-
-export const acceptChatInvitation = async (invitationId: string) => {
-  const user = ensureAuth();
-  const invitationRef = doc(db, 'notifications', invitationId);
-  const invitationDoc = await getDoc(invitationRef);
-
-  if (!invitationDoc.exists()) {
-    throw new Error('Invitation not found');
-  }
-
-  const invitation = invitationDoc.data();
-  const chatId = await createChat(invitation.senderId, user.uid);
-
-  await updateDoc(invitationRef, { status: 'accepted', chatId });
-  await deleteDoc(invitationRef);
-
-  return chatId;
-};
-
-export async function getUserById(userId: string) {
+export const getUserById = async (userId: string) => {
   const userDoc = await getDoc(doc(db, 'users', userId));
   if (userDoc.exists()) {
     return { id: userDoc.id, ...userDoc.data() };
   }
   return null;
-}
-
-export async function getUserByUsername(username: string) {
-  const usersRef = collection(db, 'users');
-  const q = query(usersRef, where('username', '==', username), limit(1));
-  const querySnapshot = await getDocs(q);
-  
-  if (!querySnapshot.empty) {
-    const userDoc = querySnapshot.docs[0];
-    return { id: userDoc.id, ...userDoc.data() };
-  }
-  return null;
-}
-
-export const createChatRequest = async (senderId: string, recipientId: string, chatType: 'persistent' | 'oneTime') => {
-  const chatRequestRef = await addDoc(collection(db, 'chatRequests'), {
-    senderId,
-    recipientId,
-    chatType,
-    status: 'pending',
-    timestamp: serverTimestamp(),
-  });
-  return chatRequestRef.id;
 };
+
+async function createNotification(userId: string, type: string, senderId: string, chatRequestId: string) {
+  try {
+    console.log('Creating notification:', { userId, type, senderId, chatRequestId });
+    const notificationRef = doc(db, 'users', userId, 'notifications', chatRequestId);
+    const senderDoc = await getDoc(doc(db, 'users', senderId));
+    const senderData = senderDoc.data();
+    const senderUsername = senderData?.username || 'A user';
+
+    const notificationData = {
+      type,
+      senderId,
+      chatRequestId,
+      message: `${senderUsername} sent you a chat request`,
+      createdAt: serverTimestamp(),
+      read: false,
+    };
+    console.log('Notification data:', notificationData);
+
+    await setDoc(notificationRef, notificationData);
+    console.log('Notification created successfully, docId:', notificationRef.id);
+    return notificationRef.id;
+  } catch (error) {
+    console.error('Error creating notification:', error);
+    throw error;
+  }
+}
+
+export const getOnlineUsers = async (): Promise<ProfileUser[]> => {
+  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+  const q = query(
+    collection(db, 'users'),
+    where('lastActive', '>=', Timestamp.fromDate(fiveMinutesAgo))
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({
+    id: doc.id,
+    username: doc.data().username,
+    karma: doc.data().karma,
+    bio: doc.data().bio,
+    // Include other fields as needed
+  })) as ProfileUser[];
+};
+
+console.log('Firebase config:', firebaseConfig);

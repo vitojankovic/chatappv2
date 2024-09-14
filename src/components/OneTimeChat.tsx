@@ -1,110 +1,34 @@
-'use client';
+import { getOnlineUsers } from '@/utils/firebase';
+import { useEffect, useState } from 'react';
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { db, sendMessage } from '@/utils/firebase';
-
-interface OneTimeChatProps {
-  chatId: string;
-}
-
-interface Message {
-  sender: string;
-  content: string;
-  timestamp: string;
-}
-
-interface ChatData {
-  messages: Message[];
-  currentTurn: string;
-  phase: 'initial' | 'feedback' | 'discussion';
-}
-
-export default function OneTimeChat({ chatId }: OneTimeChatProps) {
-  const [chatData, setChatData] = useState<ChatData | null>(null);
-  const [newMessage, setNewMessage] = useState('');
-  const { user } = useAuth();
+export default function OneTimeChat() {
+  // ... existing state ...
+  const [onlineUsers, setOnlineUsers] = useState<Chat[]>([]);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(doc(db, 'chats', chatId), (doc) => {
-      if (doc.exists()) {
-        setChatData(doc.data() as ChatData);
-      }
-    });
+    // ... existing useEffect ...
 
-    return () => unsubscribe();
-  }, [chatId]);
+    // Fetch online users
+    const fetchOnlineUsers = async () => {
+      const users = await getOnlineUsers();
+      setOnlineUsers(users);
+    };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !newMessage.trim() || !chatData) return;
+    fetchOnlineUsers();
 
-    try {
-      await sendMessage(chatId, user.uid, newMessage.trim());
-      setNewMessage('');
-    } catch (error) {
-      console.error('Error sending message:', error);
-      alert('Failed to send message.');
-    }
-  };
-
-  const handleDone = async () => {
-    if (!chatData) return;
-    const nextTurn = chatData.participants.find(id => id !== user?.uid);
-    const nextPhase = chatData.phase === 'initial' ? 'feedback' : 'discussion';
-    await updateDoc(doc(db, 'chats', chatId), {
-      currentTurn: nextTurn,
-      phase: nextPhase,
-    });
-  };
-
-  if (!chatData || !user) return <div>Loading...</div>;
-
-  const isMyTurn = chatData.currentTurn === user.uid;
-  const canSendMessage = isMyTurn && chatData.phase !== 'feedback';
+    const interval = setInterval(fetchOnlineUsers, 60000); // Refresh every minute
+    return () => clearInterval(interval);
+  }, [user]);
 
   return (
-    <div className="flex flex-col h-screen">
-      <div className="bg-purple-100 p-2 text-center">
-        <p>Current Phase: {chatData.phase}</p>
-        <p>Current Turn: {isMyTurn ? 'Your turn' : "Other user's turn"}</p>
-      </div>
-      <div className="flex-1 overflow-y-auto p-4">
-        {chatData.messages.map((message, index) => (
-          <div key={index} className={`mb-2 ${message.sender === user.uid ? 'text-right' : 'text-left'}`}>
-            <span className="inline-block bg-gray-200 rounded px-2 py-1">
-              {message.content}
-            </span>
-            <br />
-            <small className="text-gray-500">
-              {new Date(message.timestamp).toLocaleString()}
-            </small>
-          </div>
+    <div className="container mx-auto p-4">
+      {/* ... existing UI ... */}
+      <h2 className="text-xl font-semibold mt-6">Online Users</h2>
+      <ul>
+        {onlineUsers.map(u => (
+          <li key={u.id}>{u.username}</li>
         ))}
-      </div>
-      <form onSubmit={handleSendMessage} className="p-4 border-t">
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          className="w-full border rounded px-2 py-1"
-          placeholder={canSendMessage ? "Type a message..." : "Wait for your turn..."}
-          disabled={!canSendMessage}
-        />
-        <button type="submit" className="mt-2 bg-blue-500 text-white px-4 py-2 rounded" disabled={!canSendMessage}>
-          Send
-        </button>
-        {isMyTurn && (
-          <button 
-            type="button" 
-            onClick={handleDone} 
-            className="mt-2 ml-2 bg-green-500 text-white px-4 py-2 rounded"
-          >
-            I'm Done
-          </button>
-        )}
-      </form>
+      </ul>
     </div>
   );
 }

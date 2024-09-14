@@ -29,8 +29,8 @@ export default function Navbar() {
           <Link href="/find-match" className="text-lg font-semibold text-[#111111]">
             Find a match
           </Link>
-          <Link href="/past-chats" className="text-lg font-semibold text-[#111111]">
-            Past Chats
+          <Link href="/chats" className="text-lg font-semibold text-[#111111]">
+            Chats
           </Link>
           <Link href="/leaderboard" className="text-lg font-semibold text-[#111111]">
             Leaderboard

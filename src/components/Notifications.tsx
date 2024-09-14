@@ -1,65 +1,71 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { db } from '@/utils/firebase';
-import ChatRequest from './ChatRequest';
+import { auth, db, acceptChatRequest } from '@/utils/firebase';
+import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
 
 interface Notification {
   id: string;
   type: string;
   senderId: string;
-  senderName: string;
-  chatType: 'persistent' | 'oneTime';
+  message: string;
+  createdAt: Timestamp;
+  chatRequestId: string;
 }
 
-export default function Notifications() {
+const Notifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const { user } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
-    if (!user) return;
+    if (!auth.currentUser) return;
 
-    const q = query(collection(db, 'chatRequests'), where('recipientId', '==', user.uid), where('status', '==', 'pending'));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const notifs: Notification[] = [];
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        notifs.push({
-          id: doc.id,
-          type: 'chatRequest',
-          senderId: data.senderId,
-          senderName: data.senderName,
-          chatType: data.chatType,
-        });
-      });
-      setNotifications(notifs);
+    const notificationsRef = collection(db, 'users', auth.currentUser.uid, 'notifications');
+    const q = query(notificationsRef, where('read', '==', false));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const newNotifications = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Notification));
+      setNotifications(newNotifications);
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, []);
+
+  const handleAcceptRequest = async (notification: Notification) => {
+    try {
+      console.log('Accepting chat request:', notification);
+      if (!notification.id) {
+        console.error('Notification ID is undefined');
+        throw new Error('Notification ID is undefined');
+      }
+      const chatId = await acceptChatRequest(notification.id);
+      console.log('Chat request accepted, chatId:', chatId);
+      router.push(`/one-time-chat/${chatId}`);
+    } catch (error) {
+      console.error('Error accepting chat request:', error);
+      alert('Failed to accept chat request. Please try again.');
+    }
+  };
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Notifications</h2>
-      {notifications.length === 0 ? (
-        <p>No notifications</p>
-      ) : (
-        <ul className="space-y-4">
-          {notifications.map((notification) => (
-            <li key={notification.id}>
-              {notification.type === 'chatRequest' && (
-                <ChatRequest
-                  requestId={notification.id}
-                  senderName={notification.senderName}
-                  chatType={notification.chatType}
-                />
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+    <div>
+      <h2>Notifications</h2>
+      {notifications.map(notification => (
+        <div key={notification.id}>
+          <p>{notification.message}</p>
+          {notification.type === 'chat_request' && (
+            <button onClick={() => handleAcceptRequest(notification)}>
+              Accept
+            </button>
+          )}
+        </div>
+      ))}
     </div>
   );
-}
+};
+
+export default Notifications;
