@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { rtdb } from '../firebase/firebaseConfig';
 import { ref, push, onChildAdded } from 'firebase/database';
 import { performCoinFlip } from '../utils/coinFlip';
+import { useAuth } from '../contexts/AuthContext';
+import { getChatById } from '../utils/firebase'; // Ensure this function exists
 
 function ChatRoom({ user1, user2 }) {
   const [messages, setMessages] = useState([]);
@@ -32,4 +34,4 @@ function ChatRoom({ user1, user2 }) {
   );
 }
 
-export default ChatRoom;1
+export default ChatRoom;

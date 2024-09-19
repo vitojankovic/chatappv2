@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import myAnimation from './login-animationtwo.gif';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -16,52 +18,53 @@ export default function SignupPage() {
     e.preventDefault();
     try {
       await signUp(email, password, username);
-      router.push('/profile');
+      router.push('/profile')
     } catch (error: any) {
       setError(error.message);
     }
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">Sign Up</h1>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      <form onSubmit={handleSignup} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block mb-1">Email</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full p-2 border rounded"
-          />
+    <div className=" h-[100vh] w-[100vw] flex flex-col lg:flex-row items-center justify-center min-h-screen overflow-y-hidden signup-page">
+      <div className="hidden lg:block w-3/4 h-[100vh]">
+          <Image src={myAnimation} className="w-full h-[100vh] object-cover" alt="Login Animation" unoptimized />
+      </div>
+      <div className="w-full lg:w-1/4 max-w-lg h-[100vh] flex items-center justify-center">
+        <div className="w-full flex items-center justify-center h-full">
+          <div className="w-full">
+            <h1 className="text-3xl font-bold mb-8 text-center">Register</h1>
+            <form onSubmit={handleSignup} className="space-y-4 flex flex-col items-center">
+              <input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                className="w-full p-8 bg-[#EAE7E4] border-[1px] border-[#111111] border-opacity-[6.67%] rounded-lg text-xl font-bold placeholder:font-bold placeholder:text-xl"
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full p-8 bg-[#EAE7E4] border-[1px] border-[#111111] border-opacity-[6.67%] rounded-lg text-xl font-bold placeholder:font-bold placeholder:text-xl"
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full p-8 bg-[#EAE7E4] border-[1px] border-[#111111] border-opacity-[6.67%] rounded-lg text-xl font-bold placeholder:font-bold placeholder:text-xl"
+              />
+              <button type="submit" className="w-full bg-[#1E1E7C] text-white p-3 rounded-lg font-bold hover:bg-dark hover:text-white transition-all duration-500">Register</button>
+              <button type="button" onClick={() => router.push('/login')} className="w-full bg-white text-[#1E1E7C] p-3 rounded-lg font-bold border-2 border-[#1E1E7C] hover:bg-[#1E1E7C] hover:text-white transition-all duration-500">Login Instead</button>
+            </form>
+            {error && <p className="text-red-500 mt-4 text-center font-bold">{error}</p>}
+          </div>
         </div>
-        <div>
-          <label htmlFor="password" className="block mb-1">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full p-2 border rounded"
-          />
-        </div>
-        <div>
-          <label htmlFor="username" className="block mb-1">Username</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            className="w-full p-2 border rounded"
-          />
-        </div>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Sign Up</button>
-      </form>
+      </div>
     </div>
   );
 }

@@ -1,8 +1,10 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, collection, query, where, getDocs, limit, addDoc, serverTimestamp, doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, limit, addDoc, serverTimestamp, doc, getDoc, setDoc, updateDoc, deleteDoc, increment, arrayUnion, arrayRemove, runTransaction } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { getDatabase } from 'firebase/database';
+import { getDatabase, ref, set, onDisconnect } from 'firebase/database';
 import { Timestamp } from 'firebase/firestore';
+import { onSnapshot } from 'firebase/firestore';
+import { useEffect } from 'react';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -41,6 +43,8 @@ export async function getUserByUsername(username: string): Promise<ProfileUser |
       return {
         id: userDoc.id,
         username: userDoc.data().username,
+        karma: userDoc.data().karma, // Ensure karma is included
+        bio: userDoc.data().bio,
         // Add other relevant fields here
       } as ProfileUser;
     }
@@ -249,3 +253,166 @@ export const getOnlineUsers = async (): Promise<ProfileUser[]> => {
 };
 
 console.log('Firebase config:', firebaseConfig);
+
+const usersSearchingRef = doc(db, 'counters', 'usersSearching');
+
+export async function incrementUsersSearchingCount() {
+    await updateDoc(usersSearchingRef, {
+        count: increment(1)
+    });
+    console.log('Incremented usersSearching count.');
+}
+
+export async function decrementUsersSearchingCount() {
+    const currentCount = await getDoc(usersSearchingRef);
+    const count = currentCount.data()?.count || 0;
+    if (count > 0) {
+        await updateDoc(usersSearchingRef, {
+            count: increment(-1)
+        });
+        console.log('Decremented usersSearching count.');
+    } else {
+        console.log('UsersSearching count is already 0, not decrementing.');
+    }
+}
+
+export async function addToMatchingPool(userId: string, karma: number) {
+    const userRef = doc(db, 'matchingPool', userId);
+    await setDoc(userRef, { uid: userId, karma: karma });
+    await incrementUsersSearchingCount();
+    console.log(`User ${userId} added to matching pool.`);
+}
+
+export async function removeFromMatchingPool(userId: string) {
+    const userRef = doc(db, 'matchingPool', userId);
+    await deleteDoc(userRef);
+    await decrementUsersSearchingCount();
+    console.log(`User ${userId} removed from matching pool.`);
+}
+
+export async function findMatch(userId: string, karma: number): Promise<ProfileUser | null> {
+  const matchPoolRef = collection(db, 'matchingPool');
+  const q = query(
+    matchPoolRef,
+    where('karma', '>=', karma - 100),
+    where('karma', '<=', karma + 100),
+    limit(1)
+  );
+
+  const snapshot = await getDocs(q);
+  if (!snapshot.empty) {
+    const match = snapshot.docs[0];
+    if (match.id !== userId) {
+      // Match found, return user data
+      return getUserById(match.id) as Promise<ProfileUser>;
+    }
+  }
+  return null;
+}
+
+export async function getOnlineUsersCount(): Promise<number> {
+  const users = await getOnlineUsers();
+  return users.length;
+}
+
+export async function getUsersSearchingCount(): Promise<number> {
+  const countDoc = await getDoc(doc(db, 'counters', 'usersSearching'));
+  return countDoc.exists() ? countDoc.data().count : 0;
+}
+
+export async function updateUsersSearchingCount(change: number): Promise<void> {
+  await setDoc(doc(db, 'counters', 'usersSearching'), { count: increment(change) }, { merge: true });
+}
+
+export async function getUserKarma(userId: string): Promise<number> {
+  const user = await getUserById(userId);
+  return user?.karma || 0;
+}
+
+export async function setPresence(userId: string): Promise<void> {
+    const userStatusDatabaseRef = ref(realtimeDb, `presence/${userId}`);
+
+    const isOfflineForDatabase = {
+        state: 'offline',
+        lastChanged: serverTimestamp(),
+    };
+
+    const isOnlineForDatabase = {
+        state: 'online',
+        lastChanged: serverTimestamp(),
+    };
+
+    try {
+        await set(userStatusDatabaseRef, isOnlineForDatabase);
+
+        onDisconnect(userStatusDatabaseRef).set(isOfflineForDatabase);
+    } catch (error) {
+        console.error('Error setting presence:', error);
+    }
+}
+
+export const getChatById = async (chatId: string): Promise<ChatData | null> => {
+    const chatDoc = await getDoc(doc(db, 'chats', chatId));
+    if (chatDoc.exists()) {
+        return { id: chatDoc.id, ...chatDoc.data() } as ChatData;
+    }
+    return null;
+};
+
+export interface ChatData {
+    id: string;
+    participants: string[];
+    createdAt: Timestamp;
+    lastMessageTimestamp: Timestamp;
+    // Add other relevant fields here
+}
+
+export const startOneTimeChat = async (userId1: string, userId2: string): Promise<string> => {
+  return await runTransaction(db, async (transaction) => {
+    const oneTimeChatsRef = collection(db, 'oneTimeChats');
+    const q = query(
+      oneTimeChatsRef,
+      where('participants', 'array-contains', userId1),
+      where('participants', 'array-contains', userId2),
+      limit(1)
+    );
+
+    const chatSnapshot = await getDocs(q);
+
+    if (!chatSnapshot.empty) {
+      // If a one-time chat already exists between the users, return its ID
+      return chatSnapshot.docs[0].id;
+    }
+
+    // Create a new one-time chat
+    const newChatRef = await addDoc(oneTimeChatsRef, {
+      participants: [userId1, userId2],
+      createdAt: serverTimestamp(),
+      lastMessageTimestamp: serverTimestamp(),
+      status: 'active',
+    });
+
+    return newChatRef.id;
+  });
+};
+
+export const endOneTimeChat = async (chatId: string): Promise<void> => {
+  const chatRef = doc(db, 'oneTimeChats', chatId);
+  
+  // Optionally, you can archive messages or perform other cleanup here
+
+  await deleteDoc(chatRef);
+  console.log(`One-time chat ${chatId} has been deleted.`);
+};
+
+// Initialize the usersSearching counter if it doesn't exist
+export async function initializeUsersSearchingCounter() {
+    const counterDoc = await getDoc(usersSearchingRef);
+    if (!counterDoc.exists()) {
+        await setDoc(usersSearchingRef, { count: 0 });
+        console.log('Initialized usersSearching counter to 0');
+    }
+}
+
+// Call this function when your app initializes
+initializeUsersSearchingCounter().catch(console.error);

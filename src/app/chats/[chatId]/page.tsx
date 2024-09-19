@@ -109,22 +109,24 @@ export default function DirectChatPage() {
       <h1 className="text-2xl font-bold mb-4">Chat with {otherUser?.username}</h1>
       <div className="bg-white shadow-md rounded-lg p-4 h-96 overflow-y-auto mb-4">
         {messages.map((message) => (
-          <div key={message.id} className={`mb-2 ${message.senderId === user?.uid ? 'text-right' : 'text-left'}`}>
-            <span className={`inline-block p-2 rounded-lg ${message.senderId === user?.uid ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
+          <div key={message.id} className={`mb-2 ${message.senderId === user?.uid ? 'flex justify-end' : 'flex justify-start'}`}>
+            <span className={`inline-block p-2 rounded-lg ${message.senderId === user?.uid ? 'bg-color-primary text-white' : 'bg-[#EAE7E4]'}`}>
               {message.text}
             </span>
           </div>
         ))}
       </div>
-      <form onSubmit={sendMessage} className="flex">
+      <form onSubmit={sendMessage} className="flex items-center">
         <input
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
-          className="flex-grow mr-2 p-2 border rounded"
-          placeholder="Type a message..."
+          className="flex-grow mr-2 p-2 rounded-lg bg-[#EAE7E4] border-2 border-[#111111] border-opacity-[0.0667]"
+          placeholder="Write a Message"
         />
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Send</button>
+        <button type="submit" className="bg-transparent p-2">
+          <img src="/paper-plane.gif" alt="Send" className="w-6 h-6" />
+        </button>
       </form>
     </div>
   );

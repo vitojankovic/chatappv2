@@ -3,3 +3,7 @@
 @tailwind utilities;
 
 /* You can add any global styles here */
+
+body {
+    font-family: 'Raleway', sans-serif; /* Use Raleway font everywhere */
+  }

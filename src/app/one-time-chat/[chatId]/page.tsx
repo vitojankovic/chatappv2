@@ -70,7 +70,8 @@ export default function OneTimeChat() {
           currentUser: startsFirst === 'firstUser' ? user.uid : null,
           stage: 'idea',
           secondUser: null,
-          endChatProposal: null
+          endChatProposal: null,
+          turnCount: 0
         });
         return;
       }
@@ -404,18 +405,18 @@ export default function OneTimeChat() {
         <div>
           <p>Chat has ended.</p>
           {!showReportModal && (
-            <button 
-              onClick={() => setShowReportModal(true)} 
-              className="bg-yellow-500 text-white px-4 py-2 rounded mt-4"
-            >
-              Report Other User
-            </button>
+                        <button 
+                        onClick={() => setShowReportModal(true)} 
+                        className="bg-yellow-500 text-white px-4 py-2 rounded mt-4"
+                      >
+                        Report Other User
+                      </button>
           )}
         </div>
       ) : (
         <>
           <button onClick={leaveChat} className="bg-red-500 text-white px-4 py-2 rounded mt-4">
-            Leave Chat (Lose 5 Karma)
+            Leave Chat (-5 Karma)
           </button>
         </>
       )}
@@ -448,7 +449,7 @@ export default function OneTimeChat() {
               onClick={commendUser} 
               className="bg-green-500 text-white px-4 py-2 rounded mr-2"
             >
-              Yes, Commend
+              COMMEND
             </button>
             <button 
               onClick={() => {
@@ -456,7 +457,7 @@ export default function OneTimeChat() {
               }} 
               className="bg-gray-500 text-white px-4 py-2 rounded"
             >
-              No, Skip
+              DON't COMMEND
             </button>
           </div>
         </div>

@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { auth } from '@/utils/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import myAnimation from './login-animationtwo.gif';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -22,31 +24,37 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-lightBg dark:bg-darkBg">
-      <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-96">
-        <h1 className="text-2xl font-bold mb-4 text-center">Login</h1>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        <form onSubmit={handleLogin}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 mb-4 border rounded"
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 mb-4 border rounded"
-            required
-          />
-          <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">
-            Login
-          </button>
-        </form>
+    <div className="h-[100vh] w-[100vw] flex flex-col lg:flex-row items-center justify-center min-h-screen overflow-y-hidden login-page">
+      <div className="w-full lg:w-1/4 max-w-lg h-[100vh] flex items-center justify-center">
+        <div className="w-full flex items-center justify-center h-full">
+          <div className="w-full">
+            <h1 className="text-3xl font-bold mb-8 text-center">Login</h1>
+            <form onSubmit={handleLogin} className="space-y-4 flex flex-col items-center">
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full p-8 bg-[#EAE7E4] border-[1px] border-[#111111] border-opacity-[6.67%] rounded-lg text-xl font-bold placeholder:font-bold placeholder:text-xl"
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full p-8 bg-[#EAE7E4] border-[1px] border-[#111111] border-opacity-[6.67%] rounded-lg text-xl font-bold placeholder:font-bold placeholder:text-xl"
+              />
+              <button type="submit" className="w-full bg-[#1E1E7C] text-white p-3 rounded-lg font-bold hover:bg-dark hover:text-white transition-all duration-500">Login</button>
+              <button type="button" onClick={() => router.push('/signup')} className="w-full bg-white text-[#1E1E7C] p-3 rounded-lg font-bold border-2 border-[#1E1E7C] hover:bg-[#1E1E7C] hover:text-white transition-all duration-500">Register Instead</button>
+            </form>
+            {error && <p className="text-red-500 mt-4 text-center font-bold">{error}</p>}
+          </div>
+        </div>
+      </div>
+      <div className="hidden lg:block w-3/4 h-[100vh]">
+        <Image src={myAnimation} className="w-full h-[100vh] object-cover" alt="Login Animation" unoptimized />
       </div>
     </div>
   );

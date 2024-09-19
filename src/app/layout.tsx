@@ -1,9 +1,9 @@
 import './globals.css'
-import { Inter } from 'next/font/google'
+import { Raleway } from 'next/font/google' // Changed from Inter to Raleway
 import { AuthProvider } from '../contexts/AuthContext'
 import Layout from '@/components/Layout'
 
-const inter = Inter({ subsets: ['latin'] })
+const raleway = Raleway({ subsets: ['latin'] }) // Updated to use Raleway
 
 export const metadata = {
   title: 'MentForMent',
@@ -17,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={raleway.className}> {/* Updated to use raleway */}
         <AuthProvider>
           <Layout>{children}</Layout>
         </AuthProvider>
