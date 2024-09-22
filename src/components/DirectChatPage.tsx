@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '@/utils/firebase';
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, getDoc, doc } from 'firebase/firestore';
-import Send from './send.svg'
+import Send from './send (2).svg'
 import Image from 'next/image';
 
 interface Message {
@@ -78,7 +78,7 @@ export default function DirectChatPage() {
 
   return (
 <div className="container mx-auto px-4 py-8 h-screen overflow-y-auto mt-[70px]">
-  <div className="bg-laccent border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light dark:border-opacity-5 border-opacity-5 p-4 h-[calc(100vh-16rem)] overflow-y-auto mb-4">
+  <div className="bg-laccent border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light dark:border-opacity-5 border-opacity-5 p-4 h-[calc(100vh-16rem)] overflow-y-auto mb-4 md:mr-[10vw]">
     {messages.map((message) => (
       <div key={message.id} className={`mb-3 flex ${message.senderId === user?.uid ? 'justify-end' : 'justify-start'}`}>
         <span className={`inline-block p-3 rounded-lg ${message.senderId === user?.uid ? 'bg-primarylight text-light' : 'bg-laccent border-[1px] border-[1px] border-dark rounded-[6px] dark:border-[1px] dark:border-light dark:border-opacity-5 border-opacity-5 dark:bg-daccent dark:text-light text-dark'}`}>
@@ -87,17 +87,17 @@ export default function DirectChatPage() {
       </div>
     ))}
   </div>
-  <form onSubmit={sendMessage} className="flex items-center">
+  <form  onSubmit={sendMessage} className="flex items-center md:w-[calc(83%)]">
     <input
       type="text"
       value={newMessage}
       onChange={(e) => setNewMessage(e.target.value)}
-      className="flex-grow mr-2 p-3 bg-laccent border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light border-opacity-5 border-opacity- focus:outline-none focus:ring-2 focus:ring-primary placeholder-dark dark:placeholder-light text-lg"
+      className="flex-grow mr-2 p-3 bg-laccent border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light border-opacity-5  focus:outline-none focus:ring-2 focus:ring-primary placeholder-dark dark:placeholder-light text-lg w-[calc(100%-57px)]"
       placeholder="Write a Message"
       style={{ fontSize: '1.125rem' }}
     />
-    <button type="submit" className="bg-laccent border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light dark:border-opacity-5 border-opacity-5 p-2">
-      <Image src={Send} alt="Send" width={24} height={24} />
+    <button type="submit" className="bg-laccent border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light border-opacity-5 p-2 h-[57px] w-[57px] flex items-center justify-center">
+      <Image className="dark:invert" src={Send} alt="Send" width={50} height={50} />
     </button>
   </form>
 </div>

@@ -23,6 +23,17 @@ body {
     background-image: url('../components/wave.svg');
 }
 
+html{
+    background-color: #f1f1f1;
+}
+html.dark {
+    background-color: #111111;
+}
+
+.dark html{
+    background-color: #111111;
+}
+
 .loader {
     border: 8px solid #f3f3f3; /* Light grey */
     border-top: 8px solid #3498db; /* Blue */

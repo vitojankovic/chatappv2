@@ -52,14 +52,14 @@ const Notifications = () => {
   };
 
   return (
-    <div>
+    <div className="bg-red-500">
       <h2>Notifications</h2>
       {notifications.map(notification => (
         <div key={notification.id}>
           <p>{notification.message}</p>
           {notification.type === 'chat_request' && (
             <button onClick={() => handleAcceptRequest(notification)}>
-              Accept
+              N
             </button>
           )}
         </div>

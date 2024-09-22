@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '@/utils/firebase';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import Link from 'next/link';
+import { collection, query, where, onSnapshot, getDoc, doc } from 'firebase/firestore';
 import { useRouter, useParams } from 'next/navigation';
 import DirectChatPage from '@/components/DirectChatPage';
 
@@ -16,8 +15,13 @@ interface Chat {
   lastMessageTimestamp?: any;
 }
 
+interface User {
+  name: string;
+}
+
 export default function ChatList() {
   const [chats, setChats] = useState<Chat[]>([]);
+  const [users, setUsers] = useState<{[key: string]: User}>({});
   const { user } = useAuth();
   const router = useRouter();
   const params = useParams();
@@ -37,6 +41,21 @@ export default function ChatList() {
         ...doc.data()
       })) as Chat[];
       setChats(chatsData);
+      
+      // Fetch user data for each participant
+      chatsData.forEach(chat => {
+        chat.participants.forEach(async (participantId) => {
+          if (participantId !== user.uid && !users[participantId]) {
+            const userDoc = await getDoc(doc(db, 'users', participantId));
+            if (userDoc.exists()) {
+              setUsers(prevUsers => ({
+                ...prevUsers,
+                [participantId]: userDoc.data() as User
+              }));
+            }
+          }
+        });
+      });
     });
 
     return () => unsubscribe();
@@ -51,32 +70,37 @@ export default function ChatList() {
   };
 
   return (
-    <div className={`${currentChatId ? 'hidden sm:block' : ''} w-full sm:w-1/3 bg-laccent dark:bg-daccent rounded-[6px] h-[calc(100vh-16rem)] overflow-y-auto mt-[100px]`}>
+    <div className={`${currentChatId ? 'hidden sm:block ml-[10vw]' : ''} w-full sm:w-1/3 ml-[12vw] bg-laccent dark:bg-daccent rounded-[6px] h-[calc(100vh-16rem)] overflow-y-auto mt-[100px]`}>
       <h1 className="text-2xl font-bold p-4 text-dark dark:text-light">Your Chats</h1>
       {chats.length === 0 ? (
         <p className="p-4 text-dark dark:text-light">No chats found.</p>
       ) : (
         <ul>
-          {chats.map((chat) => (
-            <li 
-              key={chat.id} 
-              className={`p-4 cursor-pointer hover:bg-hover dark:hover:bg-hover-dark transition-colors
-                ${currentChatId === chat.id ? 'bg-selected dark:bg-selected-dark' : ''}`}
-              onClick={() => handleChatClick(chat)}
-            >
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-primary rounded-full mr-4"></div>
-                <div>
-                  <p className="font-semibold text-dark dark:text-light">
-                    {chat.participants.find(p => p !== user?.uid) || 'Unknown User'}
-                  </p>
-                  <p className="text-sm text-secondary dark:text-secondary-dark truncate">
-                    {chat.lastMessage || 'No messages yet'}
-                  </p>
+          {chats.map((chat) => {
+            const otherParticipantId = chat.participants.find(p => p !== user?.uid);
+            const otherParticipantName = otherParticipantId ? users[otherParticipantId]?.username || 'Loading...' : 'Unknown User';
+            
+            return (
+              <li 
+                key={chat.id} 
+                className={`p-4 cursor-pointer hover:bg-hover dark:hover:bg-hover-dark transition-colors
+                  ${currentChatId === chat.id ? 'bg-selected dark:bg-selected-dark' : ''}`}
+                onClick={() => handleChatClick(chat)}
+              >
+                <div className="flex items-center">
+                  <div className="w-12 h-12 bg-primary rounded-full mr-4"></div>
+                  <div>
+                    <p className="font-semibold text-dark dark:text-light">
+                      {otherParticipantName}
+                    </p>
+                    <p className="text-sm text-secondary dark:text-secondary-dark truncate">
+                      {chat.lastMessage || 'No messages yet'}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
