@@ -8,6 +8,21 @@ body {
     font-family: 'Raleway', sans-serif; /* Use Raleway font everywhere */
   }
 
+/* Hide scrollbar for all elements */
+* {
+  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+}
+
+/* Hide scrollbar for WebKit browsers */
+::-webkit-scrollbar {
+  display: none;
+}
+
+.background-waves{
+    background-image: url('../components/wave.svg');
+}
+
 .loader {
     border: 8px solid #f3f3f3; /* Light grey */
     border-top: 8px solid #3498db; /* Blue */

@@ -41,28 +41,30 @@ export default function Leaderboard() {
     setLoading(false);
   };
 
-  if (loading) return <div>Loading users...</div>;
+  if (loading) return <div className="text-primary dark:text-primarylight text-center">Loading users...</div>;
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">{showOnline ? 'Online Users' : 'Top 10 Users'}</h2>
+    <div className="bg-light dark:bg-dark transition-colors duration-800 ease-out p-6 rounded-lg shadow-lightshadow dark:shadow-lightshadow">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-primary dark:text-primarylight">{showOnline ? 'Online Users' : 'Top 10 Users'}</h2>
         <button
           onClick={() => setShowOnline(!showOnline)}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className="bg-primary text-white hover:bg-transparent hover:text-primary border-2 border-primary font-semibold py-2 px-4 rounded-lg transition-colors ease-out duration-300"
         >
           {showOnline ? 'Show Top Karma' : 'Show Online Users'}
         </button>
       </div>
-      <ul>
+      <ul className="space-y-4">
         {users.map((user, index) => (
-          <li key={user.id} className="mb-2 flex justify-between items-center">
-            <span>
-              {showOnline ? '' : `${index + 1}. `}
-              <Link href={`/${user.username}`} className="text-blue-500 hover:underline">{user.username}</Link>
+          <li key={user.id} className="flex justify-between items-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 ease-in-out">
+            <span className="flex items-center space-x-3">
+              {!showOnline && <span className="text-lg font-semibold text-primary dark:text-primarylight">{index + 1}.</span>}
+              <Link href={`/${user.username}`} className="text-primary dark:text-primarylight hover:underline font-medium text-lg">
+                {user.username}
+              </Link>
               {showOnline && <span className="ml-2 text-green-500">●</span>}
             </span>
-            <span className="font-bold">{user.karma} karma</span>
+            <span className="text-primary dark:text-primarylight font-bold">{user.karma} karma</span>
           </li>
         ))}
       </ul>

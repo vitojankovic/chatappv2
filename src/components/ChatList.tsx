@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { auth, db } from '@/utils/firebase';
+import { useAuth } from '../contexts/AuthContext';
+import { db } from '@/utils/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import Link from 'next/link';
-import { useAuth } from '../contexts/AuthContext';
+import { useRouter, useParams } from 'next/navigation';
+import DirectChatPage from '@/components/DirectChatPage';
 
 interface Chat {
   id: string;
@@ -16,15 +18,13 @@ interface Chat {
 
 export default function ChatList() {
   const [chats, setChats] = useState<Chat[]>([]);
-  const authState = useAuth();
-
-  console.log('AuthState in OneTimeChat:', authState);
-
-  const user = authState.user;
+  const { user } = useAuth();
+  const router = useRouter();
+  const params = useParams();
+  const currentChatId = params?.chatId as string;
 
   useEffect(() => {
-    console.log('UseEffect triggered, user:', user);
-    if (!user || !user.uid) return;
+    if (!user?.uid) return;
 
     const q = query(
       collection(db, 'chats'),
@@ -42,36 +42,43 @@ export default function ChatList() {
     return () => unsubscribe();
   }, [user]);
 
-  if (authState.loading) {
-    return <div>Loading user data...</div>;
-  }
-
-  if (!user || !user.uid) {
-    return (
-      <div>
-        <p>User data is incomplete. Please try logging in again.</p>
-        <p>Auth state: {JSON.stringify(authState, null, 2)}</p>
-        <button onClick={() => {/* Add a function to trigger re-authentication */}}>
-          Re-authenticate
-        </button>
-      </div>
-    );
-  }
+  const handleChatClick = (chat: Chat) => {
+    if (window.innerWidth < 640) {
+      router.push(`/chats/${chat.id}`);
+    } else {
+      router.push(`/chats/${chat.id}`, { scroll: false });
+    }
+  };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Your Chats</h1>
-      <p>User UID: {user.uid}</p>
-      <ul>
-        {chats.map((chat) => (
-          <li key={chat.id} className="mb-2">
-            <Link href={`/chats/${chat.id}`} className="text-blue-500 hover:underline">
-              {chat.isLive ? 'Live Chat' : 'Persistent Chat'} - 
-              {chat.lastMessage ? ` Last message: ${chat.lastMessage}` : ' No messages yet'}
-            </Link>
-          </li>
-        ))}
-      </ul>
+    <div className={`${currentChatId ? 'hidden sm:block' : ''} w-full sm:w-1/3 bg-laccent dark:bg-daccent rounded-[6px] h-[calc(100vh-16rem)] overflow-y-auto mt-[100px]`}>
+      <h1 className="text-2xl font-bold p-4 text-dark dark:text-light">Your Chats</h1>
+      {chats.length === 0 ? (
+        <p className="p-4 text-dark dark:text-light">No chats found.</p>
+      ) : (
+        <ul>
+          {chats.map((chat) => (
+            <li 
+              key={chat.id} 
+              className={`p-4 cursor-pointer hover:bg-hover dark:hover:bg-hover-dark transition-colors
+                ${currentChatId === chat.id ? 'bg-selected dark:bg-selected-dark' : ''}`}
+              onClick={() => handleChatClick(chat)}
+            >
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-primary rounded-full mr-4"></div>
+                <div>
+                  <p className="font-semibold text-dark dark:text-light">
+                    {chat.participants.find(p => p !== user?.uid) || 'Unknown User'}
+                  </p>
+                  <p className="text-sm text-secondary dark:text-secondary-dark truncate">
+                    {chat.lastMessage || 'No messages yet'}
+                  </p>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
