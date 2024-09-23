@@ -3,9 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '../../contexts/AuthContext';
-import { db, getOrCreateDirectChat, getUserByUsername } from '../../utils/firebase';
+import { getOrCreateDirectChat, getUserByUsername, ProfileUser as FirebaseProfileUser } from '../../utils/firebase';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../utils/firebase';
+
+// Update the local interface to extend the Firebase one
+interface ProfileUser extends FirebaseProfileUser {
+  name: string;
+}
 
 function getRandomColor(name: string | undefined) {
   if (!name) return '#000000';
@@ -18,13 +23,13 @@ function getRandomColor(name: string | undefined) {
 }
 
 export default function ProfilePage() {
-  const { user, loading: authLoading, updateUserProfile } = useAuth();
+const { user, loading: authLoading, updateUserProfile } = useAuth();
   const params = useParams<{ username: string }>();
   const router = useRouter();
   const username = params?.username;
   const [isEditing, setIsEditing] = useState(false);
   const [bio, setBio] = useState('');
-  const [profileUser, setProfileUser] = useState<any>(null);
+  const [profileUser, setProfileUser] = useState<ProfileUser | null>(null);
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [requestLoading, setRequestLoading] = useState(false);
@@ -36,7 +41,8 @@ export default function ProfilePage() {
         if (username) {
           const profileUserData = await getUserByUsername(username);
           if (profileUserData) {
-            setProfileUser(profileUserData);
+            // Cast the Firebase user to our local ProfileUser type
+            setProfileUser(profileUserData as ProfileUser);
             setBio(profileUserData.bio || '');
           } else {
             setProfileUser(null);
@@ -73,7 +79,7 @@ export default function ProfilePage() {
     if (isOwnProfile && user) {
       try {
         await updateUserProfile({ bio });
-        setProfileUser((prevUser: any) => ({ ...prevUser, bio }));
+        setProfileUser((prevUser: ProfileUser | null) => prevUser ? { ...prevUser, bio } : null);
         setIsEditing(false);
         setUpdateError(null);
       } catch (error) {
@@ -170,9 +176,12 @@ export default function ProfilePage() {
             </button>
             <button
               onClick={handleDirectMessage}
-              className="w-full bg-primary text-white px-4 py-2 rounded hover:bg-primarylight transition-all duration-300 shadow-lightshadow dark:shadow-none"
+              disabled={requestLoading}
+              className={`w-full bg-primary text-white px-4 py-2 rounded hover:bg-primarylight transition-all duration-300 shadow-lightshadow dark:shadow-none ${
+                requestLoading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
-              Direct Message
+              {requestLoading ? 'Loading...' : 'Direct Message'}
             </button>
           </div>
         )}

@@ -3,10 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { db, sendMessage } from '@/utils/firebase';
+import { db } from '@/utils/firebase';
+import { sendMessage } from '@/utils/firebaseUtils';
+import { User } from '@/types/User'; // Make sure to import the User type
 
 interface ChatProps {
   chatId: string;
+  otherParticipant: User; // Add this prop
 }
 
 interface Message {
@@ -15,7 +18,7 @@ interface Message {
   timestamp: string;
 }
 
-export default function Chat({ chatId }: ChatProps) {
+export default function Chat({ chatId, otherParticipant }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const { user } = useAuth();
@@ -45,6 +48,9 @@ export default function Chat({ chatId }: ChatProps) {
 
   return (
     <div className="flex flex-col h-screen">
+      <div className="bg-gray-100 p-4 border-b">
+        <h2 className="text-xl font-semibold">{otherParticipant.username}</h2>
+      </div>
       <div className="flex-1 overflow-y-auto p-4">
         {messages.map((message, index) => (
           <div key={index} className={`mb-2 ${message.sender === user?.uid ? 'text-right' : 'text-left'}`}>

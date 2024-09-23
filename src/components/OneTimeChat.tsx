@@ -1,10 +1,16 @@
 import { getOnlineUsers } from '@/utils/firebase';
 import { useEffect, useState } from 'react';
 
+// Define the Chat type
+type Chat = {
+  id: string;
+  username: string;
+  // Add other properties as needed
+};
+
 export default function OneTimeChat() {
   // ... existing state ...
   const [onlineUsers, setOnlineUsers] = useState<Chat[]>([]);
-
   useEffect(() => {
     // ... existing useEffect ...
 
@@ -18,7 +24,7 @@ export default function OneTimeChat() {
 
     const interval = setInterval(fetchOnlineUsers, 60000); // Refresh every minute
     return () => clearInterval(interval);
-  }, [user]);
+  }, []); // Remove 'user' from here
 
   return (
     <div className="container mx-auto p-4">

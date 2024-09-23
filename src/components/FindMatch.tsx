@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { findMatch, addToMatchingPool, removeFromMatchingPool, getOnlineUsersCount, getUsersSearchingCount, getUserKarma, setPresence, db } from '../utils/firebase';
+import { addToMatchingPool, removeFromMatchingPool, getOnlineUsersCount, getUsersSearchingCount, setPresence, db } from '../utils/firebase';
 import { useRouter } from 'next/navigation';
 import { onSnapshot, collection, query, where, limit } from 'firebase/firestore';
 
@@ -131,7 +131,7 @@ export default function FindMatch() {
     }, [loading, user, karmaRange, router]);
 
     useEffect(() => {
-        const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
+        const handleBeforeUnload = async () => {
             if (loading && user) {
                 await removeFromMatchingPool(user.uid);
             }

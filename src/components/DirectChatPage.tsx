@@ -12,7 +12,7 @@ interface Message {
   id: string;
   senderId: string;
   text: string;
-  timestamp: any;
+  timestamp: string;
 }
 
 interface User {
@@ -98,6 +98,7 @@ export default function DirectChatPage() {
     />
     <button type="submit" className="bg-laccent border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light border-opacity-5 p-2 h-[57px] w-[57px] flex items-center justify-center">
       <Image className="dark:invert" src={Send} alt="Send" width={50} height={50} />
+      <h1 className="hidden">{otherUser?.username}</h1>
     </button>
   </form>
 </div>

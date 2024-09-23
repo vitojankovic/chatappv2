@@ -1,11 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { auth } from '@/utils/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import myAnimation from './login-animationtwo.gif';
+import { loginUser } from '../../utils/firebase'; // Import the loginUser function
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -16,10 +15,14 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push('/');
-    } catch (error: any) {
-      setError(error.message);
+      await loginUser(email, password); // Use the loginUser function
+      router.push('/profile');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('An unknown error occurred');
+      }
     }
   };
 

@@ -15,9 +15,9 @@ function RandomChat() {
 
     setIsSearching(true);
     try {
-      await addToMatchingPool(user.uid);
-      const match = await findMatch();
-      if (match) {
+      await addToMatchingPool(user.uid, user.karma);
+      const match = await findMatch(user.uid, user.karma);
+      if (match && 'chatId' in match) {
         router.push(`/chat/${match.chatId}`);
       } else {
         await removeFromMatchingPool(user.uid);

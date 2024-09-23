@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform, useInView, MotionValue } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
 import Logo from './mentforment (2).svg';
 
 const LandingPage = () => {
-  const [coinFlipped, setCoinFlipped] = useState(false);
   const [userMessage, setUserMessage] = useState('');
   const [isInputDisabled, setIsInputDisabled] = useState(false);
   const [currentWord, setCurrentWord] = useState('product');
@@ -49,7 +48,7 @@ const LandingPage = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentWord(prevWord => {
+      setCurrentWord(() => {
         const words = ['product', 'service', 'company', 'idea', 'business'];
         return words[Math.floor(Math.random() * words.length)];
       });
@@ -112,11 +111,12 @@ const LandingPage = () => {
           <motion.h2 
             className="text-7xl font-bold text-center mt-[8vh]"
           >
-            {useTransform(howItWorksProgress, value => {
-              if (value < 0.33) return "We go over current players";
-              if (value < 0.66) return "We find the best match for you";
-              return "We connect you";
-            })}
+          {useTransform(howItWorksProgress, [0, 0.33, 0.66, 1], [
+            "We go over current players",
+            "We go over current players",
+            "We find the best match for you",
+            "We connect you"
+          ])}
           </motion.h2>
 
           <div className="relative h-[60vh] w-full max-w-4xl">
@@ -216,10 +216,7 @@ const LandingPage = () => {
               opacity: useTransform(coinFlipProgress, [0, 0.1, 0.6, 1], [1, 1, 1, 1]),
             }}
           >
-            {useTransform(coinFlipProgress, value => {
-              const text = value < 0.9 ? "Then we flip a coin" : "You go first!";
-              return text;
-            })}
+          {useTransform(coinFlipProgress, [0, 0.9, 1], ["Then we flip a coin", "Then we flip a coin", "You go first!"])}
           </motion.h2>
 
           <motion.div

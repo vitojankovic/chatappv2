@@ -5,18 +5,17 @@ import { useAuth } from '../contexts/AuthContext';
 import { db } from '@/utils/firebase';
 import { collection, query, where, onSnapshot, getDoc, doc } from 'firebase/firestore';
 import { useRouter, useParams } from 'next/navigation';
-import DirectChatPage from '@/components/DirectChatPage';
 
 interface Chat {
   id: string;
   participants: string[];
   isLive: boolean;
   lastMessage?: string;
-  lastMessageTimestamp?: any;
+  lastMessageTimestamp?: string;
 }
 
 interface User {
-  name: string;
+  username: string;
 }
 
 export default function ChatList() {
@@ -77,8 +76,14 @@ export default function ChatList() {
       ) : (
         <ul>
           {chats.map((chat) => {
+
+            console.log(users)
+
+
             const otherParticipantId = chat.participants.find(p => p !== user?.uid);
-            const otherParticipantName = otherParticipantId ? users[otherParticipantId]?.username || 'Loading...' : 'Unknown User';
+            const otherParticipantName = otherParticipantId && users[otherParticipantId]
+              ? users[otherParticipantId].username
+              : 'Loading...';
             
             return (
               <li 

@@ -1,10 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User as FirebaseUser } from 'firebase/auth';
 import { auth, db } from '../utils/firebase';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut as firebaseSignOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut, createUserWithEmailAndPassword } from 'firebase/auth';
 
 interface User {
   uid: string;  // Add this line
@@ -122,17 +121,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return () => clearInterval(interval);
     }
   }, [user]);
-
-  const createUserProfile = async (user: User) => {
-    const userRef = doc(db, 'users', user.uid);
-    await setDoc(userRef, {
-      username: user.displayName || '',
-      email: user.email,
-      createdAt: serverTimestamp(),
-      lastActive: serverTimestamp(),
-      // ... other fields ...
-    });
-  };
 
   const value = {
     user,

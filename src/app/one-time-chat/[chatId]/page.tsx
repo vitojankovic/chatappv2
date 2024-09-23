@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '../../../contexts/AuthContext';
 import { db } from '../../../utils/firebase';
@@ -12,17 +12,18 @@ import { ref, onValue } from 'firebase/database';
 
 interface ChatState {
   stage: 'feedback' | 'idea' | 'completed';
-  currentUser: string;
+  currentUser: string | null; // Allow null for currentUser
   firstUser: string;
   secondUser: string | null;
   endChatProposal: string | null;
+  turnCount: number; // Added turnCount property
 }
 
 interface Message {
   id: string;
   text: string;
   sender: string;
-  timestamp: any; // Use 'any' for now, as Firestore timestamps can be tricky to type
+  timestamp: Timestamp; // Changed 'any' to 'Timestamp'
 }
 
 interface User {
@@ -40,7 +41,6 @@ export default function OneTimeChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [chatState, setChatState] = useState<ChatState | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
   const [disconnectedUser, setDisconnectedUser] = useState<string | null>(null);
   const [showCommendModal, setShowCommendModal] = useState(false);
@@ -162,6 +162,15 @@ export default function OneTimeChat() {
     };
   }, [user, chatId]);
 
+  const handleDisconnect = useCallback(async () => {
+    if (!user) return;
+    const userRef = doc(db, 'users', user.uid);
+    await updateDoc(userRef, {
+      lastDisconnect: serverTimestamp()
+    });
+    setDisconnectedUser(user.uid);
+  }, [user]);
+
   useEffect(() => {
     if (!chatId || !user) return;
 
@@ -176,7 +185,7 @@ export default function OneTimeChat() {
     });
 
     return () => unsubscribe();
-  }, [chatId, user]);
+  }, [chatId, user, handleDisconnect]);
 
   const updateKarma = async (userId: string, amount: number) => {
     const userRef = doc(db, 'users', userId);
@@ -311,17 +320,7 @@ export default function OneTimeChat() {
     router.push('/');
   };
 
-  const handleDisconnect = async () => {
-    if (!user) return;
-    const userRef = doc(db, 'users', user.uid);
-    await updateDoc(userRef, {
-      lastDisconnect: serverTimestamp()
-    });
-    setDisconnectedUser(user.uid);
-  };
-
   if (!user) return <div>Please sign in to access the chat</div>;
-  if (error) return <div>{error}</div>;
   if (!chatState) return <div>Loading...</div>;
 
   return (
@@ -330,7 +329,7 @@ export default function OneTimeChat() {
       {chatState && (
         <>
           <p className="mb-4">
-            {isCurrentUserTurn ? "It's your turn" : "Waiting for the other user"}
+            {isCurrentUserTurn ? "It&apos;s your turn" : "Waiting for the other user"}
             {' - '}
             {chatState.stage === 'feedback' ? 'Provide feedback' : 'Present your idea'}
           </p>
@@ -349,7 +348,7 @@ export default function OneTimeChat() {
           {disconnectedUser && (
             <div className="bg-yellow-100 p-4 rounded-md mb-4">
               {disconnectedUser === user?.uid ? 
-                "You've been disconnected. Please reconnect within 30 seconds to avoid leaving the chat." :
+                "You&apos;ve been disconnected. Please reconnect within 30 seconds to avoid leaving the chat." :
                 "The other user has disconnected. Waiting for them to reconnect..."
               }
             </div>
@@ -376,7 +375,7 @@ export default function OneTimeChat() {
               onClick={finishTurn} 
               className="bg-green-500 text-white px-4 py-2 rounded mr-2"
             >
-              I'm done with {chatState.stage === 'feedback' ? 'feedback' : 'my idea'}
+              I&apos;m done with {chatState.stage === 'feedback' ? 'feedback' : 'my idea'}
             </button>
           )}
           {chatState.endChatProposal ? (
@@ -435,7 +434,7 @@ export default function OneTimeChat() {
               onClick={() => endChat(false)} 
               className="bg-green-500 text-white px-4 py-2 rounded"
             >
-              No, Don't Report
+              No, Don&apos;t Report
             </button>
           </div>
         </div>
@@ -457,7 +456,7 @@ export default function OneTimeChat() {
               }} 
               className="bg-gray-500 text-white px-4 py-2 rounded"
             >
-              DON't COMMEND
+              DON&apos;T COMMEND
             </button>
           </div>
         </div>

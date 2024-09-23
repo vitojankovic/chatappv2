@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { db, getOnlineUsers } from '@/utils/firebase';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import Link from 'next/link';
@@ -16,11 +16,7 @@ export default function Leaderboard() {
   const [loading, setLoading] = useState(true);
   const [showOnline, setShowOnline] = useState(false);
 
-  useEffect(() => {
-    fetchUsers();
-  }, [showOnline]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     let fetchedUsers: LeaderboardUser[];
     
@@ -39,7 +35,11 @@ export default function Leaderboard() {
     
     setUsers(fetchedUsers);
     setLoading(false);
-  };
+  }, [showOnline]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   if (loading) return <div className="text-primary dark:text-primarylight text-center">Loading users...</div>;
 

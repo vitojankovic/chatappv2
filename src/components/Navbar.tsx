@@ -7,8 +7,6 @@ import { useTheme } from 'next-themes';
 import { useState, useEffect } from 'react';
 import X from './x.svg';
 import Logo from './mentforment (2).svg';
-import Sun from './sun.svg';
-import Moon from './moon.svg';
 import Bell from './bell.svg';
 import User from './user.svg';
 

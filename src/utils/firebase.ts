@@ -1,10 +1,8 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, collection, query, where, getDocs, limit, addDoc, serverTimestamp, doc, getDoc, setDoc, updateDoc, deleteDoc, increment, arrayUnion, arrayRemove, runTransaction } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, query, where, getDocs, limit, addDoc, serverTimestamp, doc, getDoc, setDoc, updateDoc, deleteDoc, increment, runTransaction } from 'firebase/firestore';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getDatabase, ref, set, onDisconnect } from 'firebase/database';
 import { Timestamp } from 'firebase/firestore';
-import { onSnapshot } from 'firebase/firestore';
-import { useEffect } from 'react';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -30,6 +28,7 @@ export interface ProfileUser {
   bio?: string;
   karma: number; // Ensure this field is present
   // Add other relevant fields here
+  oneTimeChatCount?: number;
 }
 
 export async function getUserByUsername(username: string): Promise<ProfileUser | null> {
@@ -54,6 +53,7 @@ export async function getUserByUsername(username: string): Promise<ProfileUser |
     throw error;
   }
 }
+
 
 export const sendChatRequest = async (senderId: string, receiverId: string, type: 'oneTime' | 'direct') => {
   try {
@@ -324,10 +324,6 @@ export async function updateUsersSearchingCount(change: number): Promise<void> {
   await setDoc(doc(db, 'counters', 'usersSearching'), { count: increment(change) }, { merge: true });
 }
 
-export async function getUserKarma(userId: string): Promise<number> {
-  const user = await getUserById(userId);
-  return user?.karma || 0;
-}
 
 export async function setPresence(userId: string): Promise<void> {
     const userStatusDatabaseRef = ref(realtimeDb, `presence/${userId}`);
@@ -367,8 +363,16 @@ export interface ChatData {
     // Add other relevant fields here
 }
 
+export interface ChatData {
+    id: string;
+    participants: string[];
+    createdAt: Timestamp;
+    lastMessageTimestamp: Timestamp;
+    // Add other relevant fields here
+}
+
 export const startOneTimeChat = async (userId1: string, userId2: string): Promise<string> => {
-  return await runTransaction(db, async (transaction) => {
+  return await runTransaction(db, async () => {
     const oneTimeChatsRef = collection(db, 'oneTimeChats');
     const q = query(
       oneTimeChatsRef,
@@ -416,3 +420,61 @@ export async function initializeUsersSearchingCounter() {
 
 // Call this function when your app initializes
 initializeUsersSearchingCounter().catch(console.error);
+
+export const acceptChatInvitation = async (invitationId: string) => {
+  // Implementation of acceptChatInvitation
+  // This is a placeholder, you'll need to implement the actual logic
+  console.log(`Accepting invitation with ID: ${invitationId}`);
+}
+
+export const rejectChatRequest = async (requestId: string): Promise<void> => {
+  try {
+    const requestRef = doc(db, 'chatRequests', requestId);
+    await updateDoc(requestRef, { status: 'rejected' });
+  } catch (error) {
+    console.error('Error rejecting chat request:', error);
+    throw error;
+  }
+};
+
+// Function to register a new user
+export async function registerUser(email: string, password: string, username: string): Promise<void> {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    await setDoc(doc(db, 'users', user.uid), {
+      id: user.uid,
+      email: user.email,
+      username: username,
+      bio: '',
+      karma: 0,
+      createdAt: serverTimestamp(),
+    });
+    console.log('User registered and data saved:', user);
+  } catch (error) {
+    console.error('Error registering user:', error);
+    throw error;
+  }
+}
+
+// Function to log in an existing user
+export async function loginUser(email: string, password: string): Promise<void> {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    console.log('User logged in:', userCredential.user);
+  } catch (error) {
+    console.error('Error logging in user:', error);
+    throw error;
+  }
+}
+
+// Function to log out the current user
+export async function logoutUser(): Promise<void> {
+  try {
+    await signOut(auth);
+    console.log('User logged out');
+  } catch (error) {
+    console.error('Error logging out user:', error);
+    throw error;
+  }
+}

@@ -1,26 +1,29 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import myAnimation from './login-animationtwo.gif';
+import { registerUser } from '../../utils/firebase'; // Import the registerUser function
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
-  const { signUp } = useAuth();
   const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await signUp(email, password, username);
-      router.push('/profile')
-    } catch (error: any) {
-      setError(error.message);
+      await registerUser(email, password, username); // Use the registerUser function
+      router.push('/profile');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('An unknown error occurred');
+      }
     }
   };
 

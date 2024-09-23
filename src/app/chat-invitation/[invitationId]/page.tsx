@@ -7,7 +7,7 @@ import { doc, getDoc } from 'firebase/firestore';
 
 export default function ChatInvitationPage() {
   const { invitationId } = useParams();
-  const [invitation, setInvitation] = useState<any>(null);
+  const [invitation, setInvitation] = useState<unknown>(null);
   const router = useRouter();
 
   useEffect(() => {
