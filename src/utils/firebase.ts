@@ -252,7 +252,6 @@ export const getOnlineUsers = async (): Promise<ProfileUser[]> => {
   })) as ProfileUser[];
 };
 
-console.log('Firebase config:', firebaseConfig);
 
 const usersSearchingRef = doc(db, 'counters', 'usersSearching');
 

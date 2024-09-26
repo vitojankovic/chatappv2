@@ -1,39 +1,17 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
 import { acceptChatInvitation, db } from '@/utils/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
-export default function ChatInvitationPage() {
-  const { invitationId } = useParams();
-  const [invitation, setInvitation] = useState<unknown>(null);
-  const router = useRouter();
+export async function generateStaticParams() {
+  // For now, return an empty array or implement fetchInvitationIds()
+  return [];
+  // const invitationIds = await fetchInvitationIds();
+  // return invitationIds.map((id) => ({ invitationId: id }));
+}
 
-  useEffect(() => {
-    const fetchInvitation = async () => {
-      if (typeof invitationId === 'string') {
-        const invitationDoc = await getDoc(doc(db, 'chatInvitations', invitationId));
-        if (invitationDoc.exists()) {
-          setInvitation(invitationDoc.data());
-        }
-      }
-    };
-
-    fetchInvitation();
-  }, [invitationId]);
-
-  const handleAccept = async () => {
-    if (typeof invitationId === 'string') {
-      const chatId = await acceptChatInvitation(invitationId);
-      router.push(`/chat/${chatId}`);
-    }
-  };
-
-  const handleDecline = async () => {
-    // Implement decline logic
-    router.push('/');
-  };
+export default async function ChatInvitationPage({ params }: { params: { invitationId: string } }) {
+  const { invitationId } = params;
+  const invitationDoc = await getDoc(doc(db, 'chatInvitations', invitationId));
+  const invitation = invitationDoc.exists() ? invitationDoc.data() : null;
 
   if (!invitation) return <div>Loading...</div>;
 
@@ -43,18 +21,24 @@ export default function ChatInvitationPage() {
         <h1 className="text-2xl font-bold mb-4">Chat Invitation</h1>
         <p className="mb-4">You have been invited to a chat!</p>
         <div className="flex justify-between">
-          <button
-            onClick={handleAccept}
-            className="bg-green-500 text-white px-4 py-2 rounded mr-2"
-          >
-            Accept
-          </button>
-          <button
-            onClick={handleDecline}
-            className="bg-red-500 text-white px-4 py-2 rounded"
-          >
-            Decline
-          </button>
+          <form action={async () => {
+            'use server';
+            const chatId = await acceptChatInvitation(invitationId);
+            // Redirect to the chat page
+          }}>
+            <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded mr-2">
+              Accept
+            </button>
+          </form>
+          <form action={async () => {
+            'use server';
+            // Implement decline logic
+            // Redirect to home page
+          }}>
+            <button type="submit" className="bg-red-500 text-white px-4 py-2 rounded">
+              Decline
+            </button>
+          </form>
         </div>
       </div>
     </div>

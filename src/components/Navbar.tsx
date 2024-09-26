@@ -17,6 +17,8 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
+  console.log(user)
+
   useEffect(() => {
     setIsMounted(true);
     const handleScroll = () => {
