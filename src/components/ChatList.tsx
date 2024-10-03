@@ -68,6 +68,8 @@ export default function ChatList() {
     }
   };
 
+  console.log(chats)
+
   return (
     <div className={`${currentChatId ? 'hidden sm:block ml-[10vw]' : ''} w-full sm:w-1/3 ml-[12vw] bg-laccent dark:bg-daccent rounded-[6px] h-[calc(100vh-16rem)] overflow-y-auto mt-[100px] bg-laccent border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light dark:border-opacity-5 border-opacity-5`}>
       <h1 className="text-2xl font-bold p-4 text-dark dark:text-light">Your Chats</h1>
@@ -76,6 +78,7 @@ export default function ChatList() {
       ) : (
         <ul>
           {chats.map((chat) => {
+            console.log("ChAT: ", chat)
 
             console.log(users)
 

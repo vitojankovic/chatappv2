@@ -34,7 +34,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="fixed left-0 w-full z-10 md:top-[25px] top-0 transition-colors duration-800 ease-out z-50">
+    <nav className="fixed left-0 w-full z-20 md:top-[25px] top-0 transition-colors duration-800 ease-out z-50">
       <div className="md:container md:mx-auto md:px-4 w-full">
         <div className={`flex items-center transition-colors duration-800 ease-out ${
           isScrolled 

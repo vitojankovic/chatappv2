@@ -11,7 +11,7 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   return (
     <ThemeProvider attribute="class">
-      <div className=" bg-light dark:bg-dark transition-colors duration-800 ease-out">
+      <div className="transition-colors duration-800 ease-out">
         <Navbar />
         {children}
       </div>

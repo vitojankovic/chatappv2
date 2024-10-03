@@ -211,10 +211,10 @@ export default function ProfilePage() {
     )}
 
     {isOwnProfile && (
-      <div className="mt-6">
+      <div className="mt-6 flex justify-center">
         <button
           onClick={handleLogout}
-          className="w-full bg-errorcolor text-white px-4 py-2 text-base md:text-lg rounded-[8px] hover:bg-red-600 transition-all duration-300"
+          className="w-[80%] max-w-[500px] ml-auto mr-auto bg-errorcolor text-white px-4 py-2 text-base md:text-lg rounded-[8px] hover:bg-red-600 transition-all duration-300"
         >
           Log Out
         </button>
