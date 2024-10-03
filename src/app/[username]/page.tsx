@@ -23,7 +23,7 @@ function getRandomColor(name: string | undefined) {
 }
 
 export default function ProfilePage() {
-const { user, loading: authLoading, updateUserProfile } = useAuth();
+  const { user, loading: authLoading, updateUserProfile } = useAuth();
   const params = useParams<{ username: string }>();
   const router = useRouter();
   const username = params?.username;
@@ -41,7 +41,6 @@ const { user, loading: authLoading, updateUserProfile } = useAuth();
         if (username) {
           const profileUserData = await getUserByUsername(username);
           if (profileUserData) {
-            // Cast the Firebase user to our local ProfileUser type
             setProfileUser(profileUserData as ProfileUser);
             setBio(profileUserData.bio || '');
           } else {
@@ -59,7 +58,6 @@ const { user, loading: authLoading, updateUserProfile } = useAuth();
     if (username) {
       fetchProfileUser();
     }
-
   }, [username]);
 
   const isOwnProfile = user && profileUser && user.username === profileUser.username;
@@ -121,81 +119,108 @@ const { user, loading: authLoading, updateUserProfile } = useAuth();
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 mt-[100px]">
-      <div className="bg-laccent dark:bg-daccent shadow-md dark:shadow-darkshadow rounded-lg p-6">
-        <div className="flex items-center mb-6">
-          <div
-            className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white mr-4"
-            style={{ backgroundColor: avatarColor }}
-          >
-            {initial}
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-primary dark:text-primarylight">{profileUser.name}</h1>
-            <p className="text-gray-600 dark:text-gray-300">@{profileUser.username}</p>
-          </div>
-        </div>
-        <div className="mb-4">
-          <h2 className="text-xl font-semibold mb-2 text-primary dark:text-primarylight">Bio</h2>
-          {isEditing ? (
-            <>
-              <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                className="w-full p-2 border rounded bg-light dark:bg-dark"
-              />
-              <button onClick={handleSaveBio} className="mt-2 bg-primary text-white px-4 py-2 rounded">Save</button>
-              {updateError && <p className="text-errorcolor mt-2">{updateError}</p>}
-            </>
-          ) : (
-            <>
-              <p className="text-gray-700 dark:text-gray-300">{profileUser.bio || 'No bio provided.'}</p>
-              {isOwnProfile && (
-                <button onClick={() => setIsEditing(true)} className="mt-2 text-primary dark:text-primarylight underline">Edit Bio</button>
-              )}
-            </>
-          )}
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-primary p-4 rounded-md shadow-lightshadow dark:shadow-darkshadow">
-            <h3 className="text-light font-semibold mb-1">Karma</h3>
-            <p className="text-2xl font-bold text-light">{user?.karma ?? 0}</p>
-          </div>
-          <div className="bg-light dark:bg-dark p-4 rounded-md shadow-lightshadow dark:shadow-darkshadow">
-            <h3 className="text-primary dark:text-primarylight font-semibold mb-1">One-Time Chats</h3>
-            <p className="text-2xl font-bold text-primary dark:text-primarylight">{profileUser.oneTimeChatCount || 0}</p>
-          </div>
-        </div>
-        {!isOwnProfile && (
-          <div className="mt-6 space-y-2">
-            <button
-              onClick={handleRequestOneTimeChat}
-              className="w-full bg-successcolor text-white px-4 py-2 rounded hover:bg-green-600 transition-all duration-300 shadow-lightshadow dark:shadow-none"
-            >
-              Request One-Time Chat
-            </button>
-            <button
-              onClick={handleDirectMessage}
-              disabled={requestLoading}
-              className={`w-full bg-primary text-white px-4 py-2 rounded hover:bg-primarylight transition-all duration-300 shadow-lightshadow dark:shadow-none ${
-                requestLoading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {requestLoading ? 'Loading...' : 'Direct Message'}
-            </button>
-          </div>
-        )}
-        {isOwnProfile && (
-          <div className="mt-6">
-            <button
-              onClick={handleLogout}
-              className="w-full bg-errorcolor text-white px-4 py-2 rounded hover:bg-red-600 transition-all duration-300 shadow-lightshadow dark:shadow-none"
-            >
-              Log Out
-            </button>
-          </div>
-        )}
+<div className="container mx-auto px-4 py-8 my-auto mt-[80px]">
+  <div className="bg-laccent border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light dark:border-opacity-5 border-opacity-5 p-6">
+    <div className="flex flex-col justify-center items-center text-center">
+      <div
+        className="w-[100px] h-[100px] rounded-[8px] flex items-center justify-center text-3xl font-bold text-white mb-4 mt-8"
+        style={{ backgroundColor: avatarColor }}
+      >
+        {initial}
+      </div>
+      <div>
+        {/* Username should stand out */}
+        <p className="text-primary dark:text-primary text-2xl md:text-4xl font-bold">
+          {profileUser.username}
+        </p>
       </div>
     </div>
+
+    <div className="mt-6">
+      <h2 className="text-lg md:text-xl font-semibold mb-2 text-primary dark:text-primarylight">
+        Bio
+      </h2>
+      {isEditing ? (
+        <>
+          <textarea
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            className="w-full p-2 border rounded-[8px] bg-light dark:bg-dark text-black dark:text-white"
+          />
+          <button
+            onClick={handleSaveBio}
+            className="mt-2 bg-primary text-white px-4 py-2 text-base md:text-lg rounded-[8px] hover:bg-primarylight"
+          >
+            Save
+          </button>
+          {updateError && <p className="text-errorcolor mt-2">{updateError}</p>}
+        </>
+      ) : (
+        <>
+          {/* Bio text, should be readable but not too large */}
+          <p className="text-gray-700 dark:text-gray-300 text-base md:text-lg">
+            {profileUser.bio || 'No bio provided.'}
+          </p>
+          {isOwnProfile && (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="mt-2 text-primary dark:text-primarylight underline text-sm md:text-base"
+            >
+              Edit Bio
+            </button>
+          )}
+        </>
+      )}
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+      <div className="bg-primary p-4 rounded-[8px] shadow-lightshadow dark:shadow-darkshadow">
+        <h3 className="text-light font-semibold mb-1 text-lg">Karma</h3>
+        {/* Karma score should be large to emphasize importance */}
+        <p className="text-3xl font-bold text-light">{user?.karma ?? 0}</p>
+      </div>
+
+      <div className="bg-light dark:bg-dark p-4 rounded-[8px] shadow-lightshadow dark:shadow-darkshadow">
+        <h3 className="text-primary dark:text-primarylight font-semibold mb-1 text-lg">
+          One-Time Chats
+        </h3>
+        <p className="text-3xl font-bold text-primary dark:text-primarylight">
+          {profileUser.oneTimeChatCount || 0}
+        </p>
+      </div>
+    </div>
+
+    {!isOwnProfile && (
+      <div className="mt-6 space-y-2">
+        <button
+          onClick={handleRequestOneTimeChat}
+          className="w-full bg-successcolor text-white px-4 py-2 text-base md:text-lg rounded-[8px] hover:bg-green-600 transition-all duration-300"
+        >
+          Request One-Time Chat
+        </button>
+        <button
+          onClick={handleDirectMessage}
+          disabled={requestLoading}
+          className={`w-full bg-primary text-white px-4 py-2 text-base md:text-lg rounded-[8px] hover:bg-primarylight transition-all duration-300 ${
+            requestLoading ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+        >
+          {requestLoading ? 'Loading...' : 'Direct Message'}
+        </button>
+      </div>
+    )}
+
+    {isOwnProfile && (
+      <div className="mt-6">
+        <button
+          onClick={handleLogout}
+          className="w-full bg-errorcolor text-white px-4 py-2 text-base md:text-lg rounded-[8px] hover:bg-red-600 transition-all duration-300"
+        >
+          Log Out
+        </button>
+      </div>
+    )}
+  </div>
+</div>
   );
 }

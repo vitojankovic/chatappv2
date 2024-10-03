@@ -22,6 +22,8 @@ const LandingPage = () => {
     }, 250)
   }
 
+  const [isInputFilled, setIsInputFilled] = useState()
+
 
   const ScrollIndicator = () => {
     return (
@@ -240,7 +242,7 @@ const LandingPage = () => {
           <motion.div
             className="w-[40vh] h-[40vh] mb-8 "
             style={{
-              rotateY: useTransform(coinFlipProgress, [0.5, 1], [0, 360]), // 4 full rotations
+              rotateX: useTransform(coinFlipProgress, [0.5, 1], [0, 360]), // 4 full rotations
             }}
           >
             <Image 
@@ -255,7 +257,7 @@ const LandingPage = () => {
       </section>
 
       {/* User Input Section */}
-      <section className="min-h-screen flex flex-col items-center justify-center bg-light dark:bg-dark relative overflow-hidden">
+      <section className="h-[100vh] flex flex-col items-center justify-center bg-light dark:bg-dark relative overflow-hidden">
         <h2 className="text-3xl font-bold mb-4 text-dark dark:text-light">
           {isInputDisabled ? "And now you wait for feedback on the other side" : "Write what you need help with"}
         </h2>
@@ -265,9 +267,11 @@ const LandingPage = () => {
           } dark:bg-daccent dark:border-[4px] dark:border-light dark:border-opacity-5 border-opacity-5 focus:outline-none focus:ring-2 focus:ring-primary placeholder-dark dark:placeholder-light z-10`}
           placeholder="Enter your message here..."
           value={userMessage}
-          onChange={(e) => setUserMessage(e.target.value)}
           disabled={isInputDisabled}
           style={{ fontSize: '1.5rem' }}
+          onChange={(e) => {
+            setUserMessage(e.target.value);
+          }}
         />
         <motion.button
           className="mt-8 bg-primary text-white text-2xl font-bold py-4 px-8 rounded-lg shadow-lg hover:bg-primarylight transition duration-300 ease-in-out z-10"

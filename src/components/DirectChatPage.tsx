@@ -77,7 +77,7 @@ export default function DirectChatPage() {
   };
 
   return (
-<div className="container mx-auto px-4 py-8 h-screen overflow-y-auto mt-[70px]">
+<div className="container mx-auto px-4 py-8 overflow-y-auto mt-[70px]">
   <div className="bg-laccent border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light dark:border-opacity-5 border-opacity-5 p-4 h-[calc(100vh-16rem)] overflow-y-auto mb-4 md:mr-[10vw]">
     {messages.map((message) => (
       <div key={message.id} className={`mb-3 flex ${message.senderId === user?.uid ? 'justify-end' : 'justify-start'}`}>

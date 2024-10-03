@@ -38,7 +38,7 @@ export default function Navbar() {
       <div className="md:container md:mx-auto md:px-4 w-full">
         <div className={`flex items-center transition-colors duration-800 ease-out ${
           isScrolled 
-            ? 'md:bg-laccent/40 dark:md:bg-daccent/40 md:backdrop-blur-md bg-primary/90 dark:bg-primary-dark/90' 
+            ? 'md:bg-laccent/40 dark:md:bg-daccent/40 md:backdrop-blur-md bg-laccent/90 dark:bg-daccent-dark/90' 
             : 'md:bg-laccent dark:md:bg-daccent'
         } md:h-16 md:rounded-[8px] h-[80px] w-full`}>
           <div className="flex items-center px-6">

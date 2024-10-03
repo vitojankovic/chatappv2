@@ -62,25 +62,34 @@ export default function NotificationsPage() {
   if (error) return <div className="flex justify-center items-center h-screen text-errorcolor">{error}</div>;
 
   return (
-    <div className="container mx-auto px-4 py-8 mt-[100px] max-w-2xl">
-      <h1 className="text-3xl font-bold mb-8 text-primary">Notifications</h1>
-      {notifications.length === 0 ? (
-        <p className="text-center text-daccent">No new notifications</p>
-      ) : (
-        <ul className="space-y-4">
-          {notifications.map((notification) => (
-            <li key={notification.id} className="bg-light dark:bg-dark shadow-md rounded-lg p-6 transition-all duration-300 hover:shadow-lg">
-              <p className="text-daccent dark:text-laccent mb-4">{notification.message}</p>
-              <button 
-                onClick={() => handleAccept(notification.id)}
-                className="w-full bg-primary hover:bg-primarylight text-light font-semibold py-2 px-4 rounded transition-colors duration-300"
-              >
-                Accept
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+<div className="container mx-auto px-4 py-8 mt-[100px] max-w-[77dvw] border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light dark:border-opacity-5 border-opacity-5 bg-laccent">
+  {/* Notifications Title */}
+  <h1 className="text-4xl font-bold mb-8 text-primary dark:text-primarylight text-center">Notifications</h1>
+
+  {/* Notifications List */}
+  {notifications.length === 0 ? (
+    <p className="text-center text-daccent dark:text-laccent text-lg">No new notifications</p>
+  ) : (
+    <ul className="space-y-6 ">
+      {notifications.map((notification) => (
+        <li 
+          key={notification.id} 
+          className="shadow-md rounded-lg p-6 transition-all duration-300 hover:shadow-xl hover:bg-opacity-90 border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light dark:border-opacity-5 border-opacity-5 bg-laccent text-center"
+        >
+          {/* Notification Message */}
+          <p className="text-primary dark:text-primarylight text-base mb-4">{notification.message}</p>
+
+          {/* Accept Button */}
+          <button 
+            onClick={() => handleAccept(notification.id)}
+            className="w-full bg-primary hover:bg-primarylight text-light font-semibold py-2 px-4 rounded transition-colors duration-300 text-base"
+          >
+            Accept
+          </button>
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
   );
 }

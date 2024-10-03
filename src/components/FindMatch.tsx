@@ -158,46 +158,54 @@ export default function FindMatch() {
     }, [user]);
 
     return (
-        <div className="mt-[100px] flex flex-col items-center justify-center text-center px-4">
-            <h2 className="text-4xl font-bold mb-8 text-dark dark:text-light">
-                Ready for a battle?
-            </h2>
-            {!loading ? (
-                <button 
-                    onClick={handleFindMatch} 
-                    className="bg-primary hover:bg-primarylight text-light font-semibold py-4 px-8 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-md text-xl"
-                >
-                    Find a match
-                </button>
-            ) : (
-                <div className="space-y-4">
-                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                    <button 
-                        onClick={handleCancel} 
-                        className="bg-errorcolor hover:bg-red-700 text-light font-semibold py-2 px-6 rounded-lg transition duration-300 ease-in-out"
-                    >
-                        Cancel Search
-                    </button>
-                </div>
-            )}
-            <div className="mt-8 flex space-x-8 text-dark dark:text-light">
-                <p>
-                    <span className="font-semibold">{onlineUsers}</span> online users
-                </p>
-                <p>
-                    <span className="font-semibold">{searchingUsers}</span> users searching
-                </p>
-            </div>
-            {loading && (
-                <p className="mt-4 text-dark dark:text-light">
-                    Searching for {searchTime} seconds
-                </p>
-            )}
-            {matchError && (
-                <p className="mt-4 text-errorcolor">
-                    {matchError}
-                </p>
-            )}
+<div className="flex justify-center items-center min-h-screen">
+  <div className="bg-laccent dark:bg-daccent border-[4px] border-dark rounded-[8px] dark:border-light border-opacity-5 dark:border-opacity-5 transition-colors duration-800 ease-out p-6 shadow-lightshadow dark:shadow-darkshadow md:max-w-xl w-full sm:w-[90%] md:w-[80%]">
+    <div className="mt-[50px] flex flex-col items-center justify-center text-center px-4">
+      <h2 className="text-4xl font-bold mb-8 text-dark dark:text-light">
+        Ready for a battle?
+      </h2>
+
+      {!loading ? (
+        <button 
+          onClick={handleFindMatch} 
+          className="bg-primary hover:bg-primarylight text-light font-semibold py-4 px-8 rounded-[8px] transition duration-300 ease-in-out transform hover:scale-105 shadow-md text-xl"
+        >
+          Find a match
+        </button>
+      ) : (
+        <div className="space-y-4">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <button 
+            onClick={handleCancel} 
+            className="bg-errorcolor hover:bg-red-700 text-light font-semibold py-2 px-6 rounded-[8px] transition duration-300 ease-in-out"
+          >
+            Cancel Search
+          </button>
         </div>
+      )}
+
+      <div className="mt-8 flex space-x-8 text-dark dark:text-light">
+        <p>
+          <span className="font-semibold">{onlineUsers}</span> online users
+        </p>
+        <p>
+          <span className="font-semibold">{searchingUsers}</span> users searching
+        </p>
+      </div>
+
+      {loading && (
+        <p className="mt-4 text-dark dark:text-light">
+          Searching for {searchTime} seconds
+        </p>
+      )}
+
+      {matchError && (
+        <p className="mt-4 text-errorcolor">
+          {matchError}
+        </p>
+      )}
+    </div>
+  </div>
+</div>
     );
 }
