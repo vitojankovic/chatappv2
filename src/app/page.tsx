@@ -1,10 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import LandingPage from '@/components/LandingPage';
 import Layout from '@/components/Layout';
-import loaderGif from './loader (1).gif';
 
 function HomeContent() {
   /*const [isLoading, setIsLoading] = useState(true);

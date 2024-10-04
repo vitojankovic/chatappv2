@@ -327,12 +327,13 @@ export default function OneTimeChat() {
 
   return (
     <div className="container mx-auto px-4 py-8 overflow-y-auto mt-[70px]">
-    <h1 className="text-3xl font-bold mb-6 text-dark dark:text-light">One-Time Chat</h1>
-    {chatState && (
-      <div className="bg-laccent border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light dark:border-opacity-5 border-opacity-5 p-4 h-[calc(100vh-16rem)] flex flex-col mb-4">
+  {chatState && (
+    <>
+      {/* Message Container */}
+      <div className="bg-laccent border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light dark:border-opacity-5 border-opacity-5 p-4 h-[calc(100vh-20rem)] flex flex-col mb-4">
         <p className="mb-4 text-lg">
           {isCurrentUserTurn ? "It's your turn" : "Waiting for the other user"}
-          {' - '}
+          {" - "}
           {chatState.stage === 'feedback' ? 'Provide feedback' : 'Present your idea'}
         </p>
         {!chatState.secondUser && (
@@ -340,118 +341,151 @@ export default function OneTimeChat() {
         )}
         <div className="messages-container flex-grow overflow-y-auto mb-4">
           {messages.map((message) => (
-            <div key={message.id} className={`mb-3 flex ${message.sender === user?.uid ? 'justify-end' : 'justify-start'}`}>
-              <span className={`inline-block p-3 rounded-lg ${message.sender === user?.uid ? 'bg-primarylight text-light' : 'bg-gray-200 border border-gray-300 dark:bg-daccent dark:text-light text-dark'}`}>
+            <div
+              key={message.id}
+              className={`mb-3 flex ${message.sender === user?.uid ? 'justify-end' : 'justify-start'}`}
+            >
+              <span
+                className={`inline-block p-3 rounded-lg ${
+                  message.sender === user?.uid
+                    ? 'bg-primarylight text-light'
+                    : 'bg-laccent border-[1px] border-[1px] border-dark rounded-[6px] dark:border-[1px] dark:border-light dark:border-opacity-5 border-opacity-5 dark:bg-daccent dark:text-light text-dark'
+                }`}
+              >
                 {message.text}
               </span>
             </div>
           ))}
         </div>
-        <div className="sticky bottom-0 p-4">
-          <form onSubmit={sendMessage} className="flex items-center">
-            <input
-              type="text"
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              className="flex-grow border rounded-lg px-4 py-2 mr-2 bg-laccent border-[4px] border-dark dark:bg-daccent dark:border-[4px] dark:border-light border-opacity-5 placeholder-gray-500 dark:placeholder-light focus:outline-none focus:ring-2 focus:ring-primary text-lg"
-              placeholder="Type a message..."
-              disabled={!isCurrentUserTurn || disconnectedUser !== null}
-            />
-     <button type="submit" className="bg-laccent border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light border-opacity-5 p-2 h-[57px] w-[57px] flex items-center justify-center">
-      <Image className="dark:invert" src={Send} alt="Send" width={50} height={50} />
-    </button>
-          </form>
-          {user && chatState && user.uid === chatState.currentUser && (
+      </div>
+
+      {/* Form Container - Moved outside */}
+      <div className="sticky bottom-0">
+        <form onSubmit={sendMessage} className="flex items-center">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            className="flex-grow border rounded-lg px-4 py-2 mr-2 bg-laccent border-[4px] border-dark dark:bg-daccent dark:border-[4px] dark:border-light border-opacity-5 focus:outline-none focus:ring-2 focus:ring-primary text-lg placeholder-dark dark:placeholder-light h-[60px]"
+            placeholder="Write a message..."
+            disabled={!isCurrentUserTurn || disconnectedUser !== null}
+          />
+          <button
+            type="submit"
+            className="bg-laccent border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light border-opacity-5 p-2 h-[57px] w-[57px] flex items-center justify-center"
+          >
+            <Image className="dark:invert" src={Send} alt="Send" width={50} height={50} />
+          </button>
+        </form>
+      </div>
+
+      {/* End Chat & Additional Actions */}
+      {user && chatState && user.uid === chatState.currentUser && (
+        <button
+          onClick={finishTurn}
+          className="bg-green-500 text-white px-4 py-2 rounded-lg mt-2"
+        >
+          I'm done with {chatState.stage === 'feedback' ? 'feedback' : 'my idea'}
+        </button>
+      )}
+      {chatState.endChatProposal ? (
+        chatState.endChatProposal === user.uid ? (
+          <p>Waiting for the other user to accept the end chat proposal...</p>
+        ) : (
+          <div>
+            <p>The other user has proposed to end the chat. Do you accept?</p>
             <button
-              onClick={finishTurn}
-              className="bg-green-500 text-white px-4 py-2 rounded-lg mt-2"
+              onClick={() => respondToEndChatProposal(true)}
+              className="bg-green-500 text-white px-4 py-2 rounded-lg mr-2"
             >
-              I'm done with {chatState.stage === 'feedback' ? 'feedback' : 'my idea'}
+              Accept
+            </button>
+            <button
+              onClick={() => respondToEndChatProposal(false)}
+              className="bg-red-500 text-white px-4 py-2 rounded-lg"
+            >
+              Decline
+            </button>
+          </div>
+        )
+      ) : (
+        <button
+          onClick={proposeEndChat}
+          className="bg-red-500 text-white px-4 py-2 rounded-lg mt-[10px]"
+        >
+          Propose to End Chat
+        </button>
+      )}
+
+      {chatState.stage === 'completed' ? (
+        <div className="text-center mt-4">
+          <p className="text-lg">Chat has ended.</p>
+          {!showReportModal && (
+            <button
+              onClick={() => setShowReportModal(true)}
+              className="bg-yellow-500 text-white px-4 py-2 rounded-lg mt-4"
+            >
+              Report Other User
             </button>
           )}
-          {chatState.endChatProposal ? (
-            chatState.endChatProposal === user.uid ? (
-              <p>Waiting for the other user to accept the end chat proposal...</p>
-            ) : (
-              <div>
-                <p>The other user has proposed to end the chat. Do you accept?</p>
-                <button onClick={() => respondToEndChatProposal(true)} className="bg-green-500 text-white px-4 py-2 rounded-lg mr-2">
-                  Accept
-                </button>
-                <button onClick={() => respondToEndChatProposal(false)} className="bg-red-500 text-white px-4 py-2 rounded-lg">
-                  Decline
-                </button>
-              </div>
-            )
-          ) : (
-            <button onClick={proposeEndChat} className="bg-red-500 text-white px-4 py-2 rounded-lg mt-[10px]">
-              Propose to End Chat
+        </div>
+      ) : (
+        <button
+          onClick={leaveChat}
+          className="bg-red-500 text-white px-4 py-2 rounded-lg mt-4"
+        >
+          Leave Chat (-5 Karma)
+        </button>
+      )}
+
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-4 rounded shadow-md">
+            <p>Do you want to report the other user? They will lose 10 karma if reported.</p>
+            <button
+              onClick={() => endChat(true)}
+              className="bg-red-500 text-white px-4 py-2 rounded-lg mr-2"
+            >
+              Yes, Report
             </button>
-          )}
+            <button
+              onClick={() => endChat(false)}
+              className="bg-green-500 text-white px-4 py-2 rounded-lg"
+            >
+              No, Don&apos;t Report
+            </button>
+          </div>
         </div>
-      </div>
-    )}
-  
-    {chatState.stage === 'completed' ? (
-      <div className="text-center mt-4">
-        <p className="text-lg">Chat has ended.</p>
-        {!showReportModal && (
-          <button
-            onClick={() => setShowReportModal(true)}
-            className="bg-yellow-500 text-white px-4 py-2 rounded-lg mt-4"
-          >
-            Report Other User
-          </button>
-        )}
-      </div>
-    ) : (
-      <button onClick={leaveChat} className="bg-red-500 text-white px-4 py-2 rounded-lg mt-4">
-        Leave Chat (-5 Karma)
-      </button>
-    )}
-  
-    {showReportModal && (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-        <div className="bg-white p-4 rounded shadow-md">
-          <p>Do you want to report the other user? They will lose 10 karma if reported.</p>
-          <button
-            onClick={() => endChat(true)}
-            className="bg-red-500 text-white px-4 py-2 rounded-lg mr-2"
-          >
-            Yes, Report
-          </button>
-          <button
-            onClick={() => endChat(false)}
-            className="bg-green-500 text-white px-4 py-2 rounded-lg"
-          >
-            No, Don&apos;t Report
-          </button>
+      )}
+
+      {showCommendModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-4 rounded shadow-md">
+            <p>
+              Would you like to commend the other user for a positive interaction? They will
+              receive 3 karma.
+            </p>
+            <button
+              onClick={commendUser}
+              className="bg-green-500 text-white px-4 py-2 rounded-lg mr-2"
+            >
+              COMMEND
+            </button>
+            <button
+              onClick={() => {
+                setShowCommendModal(false);
+              }}
+              className="bg-gray-500 text-white px-4 py-2 rounded-lg"
+            >
+              DON&apos;T COMMEND
+            </button>
+          </div>
         </div>
-      </div>
-    )}
-  
-    {showCommendModal && (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-        <div className="bg-white p-4 rounded shadow-md">
-          <p>Would you like to commend the other user for a positive interaction? They will receive 3 karma.</p>
-          <button
-            onClick={commendUser}
-            className="bg-green-500 text-white px-4 py-2 rounded-lg mr-2"
-          >
-            COMMEND
-          </button>
-          <button
-            onClick={() => {
-              setShowCommendModal(false);
-            }}
-            className="bg-gray-500 text-white px-4 py-2 rounded-lg"
-          >
-            DON&apos;T COMMEND
-          </button>
-        </div>
-      </div>
-    )}
-  </div>
+      )}
+    </>
+  )}
+</div>
+
   
 
   );

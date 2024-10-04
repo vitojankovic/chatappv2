@@ -259,7 +259,6 @@ export async function incrementUsersSearchingCount() {
     await updateDoc(usersSearchingRef, {
         count: increment(1)
     });
-    console.log('Incremented usersSearching count.');
 }
 
 export async function decrementUsersSearchingCount() {
@@ -279,14 +278,12 @@ export async function addToMatchingPool(userId: string, karma: number) {
     const userRef = doc(db, 'matchingPool', userId);
     await setDoc(userRef, { uid: userId, karma: karma });
     await incrementUsersSearchingCount();
-    console.log(`User ${userId} added to matching pool.`);
 }
 
 export async function removeFromMatchingPool(userId: string) {
     const userRef = doc(db, 'matchingPool', userId);
     await deleteDoc(userRef);
     await decrementUsersSearchingCount();
-    console.log(`User ${userId} removed from matching pool.`);
 }
 
 export async function findMatch(userId: string, karma: number): Promise<ProfileUser | null> {

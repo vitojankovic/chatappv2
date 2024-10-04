@@ -6,7 +6,7 @@ import Layout from '@/components/Layout'
 const raleway = Raleway({ subsets: ['latin'] }) // Updated to use Raleway
 
 export const metadata = {
-  title: 'MentForMent',
+  title: 'LoopFeed',
   description: 'Connect with mentors and mentees',
 }
 
