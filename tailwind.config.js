@@ -7,7 +7,58 @@ module.exports = {
     extend: {
       colors: {
 
-        light: '#f1f1f1', 
+
+
+        light: '#FDF5E6',
+        dark: '#424242',
+        laccent: '#FFCCBC',
+        daccent: '#F57C00',
+        primary: '#FFA726',
+        primarylight: '#FFB74D',
+        lightshadow: 'rgba(0, 0, 0, 0.1)',
+        darkshadow: 'rgba(255, 255, 255, 0.1)',
+        successcolor: '#66BB6A',
+        warningcolor: '#FFEE58',
+        errorcolor: '#EF5350',
+        infocolor: '#42A5F5'
+        
+
+        /*light: '#F9F9F9',
+        dark: '#333333',
+        laccent: '#FFD180',
+        daccent: '#FF6F00',
+        primary: '#FF3D00',
+        primarylight: '#FF8A50',
+        lightshadow: 'rgba(0, 0, 0, 0.1)',
+        darkshadow: 'rgba(255, 255, 255, 0.1)',
+        successcolor: '#43A047',
+        warningcolor: '#FFB300',
+        errorcolor: '#D32F2F',
+        infocolor: '#1976D2'*/
+
+
+
+        /*light: '#f1f1f1',
+        dark: '#111111',
+        laccent: '#E0F7FA',
+        daccent: '#006064',
+        primary: '#00796B',
+        primarylight: '#48A999',
+        lightshadow: 'rgba(0, 0, 0, 0.1)',
+        darkshadow: 'rgba(255, 255, 255, 0.1)',
+        successcolor: '#66BB6A',
+        warningcolor: '#FFB300',
+        errorcolor: '#E53935',
+        infocolor: '#039BE5'*/
+
+
+
+
+
+
+
+
+        /*light: '#f1f1f1', 
         dark: '#111111',
         laccent: '#EAE7E4',
         daccent: '#413B3B',  
@@ -18,7 +69,7 @@ module.exports = {
         successcolor: '#28a745',
         warningcolor: '##ffc107',
         errorcolor: '#dc2626',
-        infocolor: '#17a2b8',
+        infocolor: '#17a2b8',*/
 
         /*light: '#D0E8F2',
         dark: '#0B3D6A',

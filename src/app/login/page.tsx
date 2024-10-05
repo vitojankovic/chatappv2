@@ -39,7 +39,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full p-8 bg-[#EAE7E4] border-[1px] border-[#111111] border-opacity-[6.67%] rounded-lg text-xl font-bold placeholder:font-bold placeholder:text-xl"
+                className="w-[90%] p-8 bg-[#EAE7E4] border-[1px] border-[#111111] border-opacity-[6.67%] rounded-lg text-xl font-bold placeholder:font-bold placeholder:text-xl"
               />
               <input
                 type="password"
@@ -47,10 +47,10 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full p-8 bg-[#EAE7E4] border-[1px] border-[#111111] border-opacity-[6.67%] rounded-lg text-xl font-bold placeholder:font-bold placeholder:text-xl"
+                className="w-[90%] p-8 bg-[#EAE7E4] border-[1px] border-[#111111] border-opacity-[6.67%] rounded-lg text-xl font-bold placeholder:font-bold placeholder:text-xl"
               />
-              <button type="submit" className="w-full bg-[#1E1E7C] text-white p-3 rounded-lg font-bold hover:bg-dark hover:text-white transition-all duration-500">Login</button>
-              <button type="button" onClick={() => router.push('/signup')} className="w-full bg-white text-[#1E1E7C] p-3 rounded-lg font-bold border-2 border-[#1E1E7C] hover:bg-[#1E1E7C] hover:text-white transition-all duration-500">Register Instead</button>
+              <button type="submit" className="w-[90%] bg-[#1E1E7C] text-white p-3 rounded-lg font-bold hover:bg-dark hover:text-white transition-all duration-500">Login</button>
+              <button type="button" onClick={() => router.push('/signup')} className="w-[90%] bg-white text-[#1E1E7C] p-3 rounded-lg font-bold border-2 border-[#1E1E7C] hover:bg-[#1E1E7C] hover:text-white transition-all duration-500">Register Instead</button>
             </form>
             {error && <p className="text-red-500 mt-4 text-center font-bold">{error}</p>}
           </div>
