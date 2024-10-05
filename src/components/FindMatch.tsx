@@ -96,39 +96,45 @@ export default function FindMatch() {
 
     // Real-time matching pool listener
     useEffect(() => {
-        if (!loading || !user) return;
-
-        const matchPoolRef = collection(db, 'matchingPool');
-        const q = query(
-            matchPoolRef,
-            where('karma', '>=', user.karma - karmaRange),
-            where('karma', '<=', user.karma + karmaRange),
-            limit(1)  // Limit to 1 match for quicker response
-        );
-
-        const unsubscribe = onSnapshot(q, async (snapshot) => {
-            if (!snapshot.empty) {
-                const match = snapshot.docs[0];
-                if (match.id !== user.uid) {  // Ensure not matching with self
-                    // Remove matched user from pool
-                    await removeFromMatchingPool(match.id);
-                    // Remove self from pool
-                    await removeFromMatchingPool(user.uid);
-                    setLoading(false);
-                    setSearchingUsers(prev => prev - 1);
-                    router.push(`/one-time-chat/${match.id}`);
-                }
-            }
-        });
-
-        // Cleanup listener on unmount
-        return () => {
-            unsubscribe();
-            if (user) {
-                removeFromMatchingPool(user.uid).catch(err => console.error('Error removing user on cleanup:', err));
-            }
-        };
-    }, [loading, user, karmaRange, router]);
+      if (!loading || !user) return;
+  
+      const matchPoolRef = collection(db, 'matchingPool');
+      const q = query(
+          matchPoolRef,
+          where('karma', '>=', user.karma - karmaRange),
+          where('karma', '<=', user.karma + karmaRange),
+          limit(1)  // Limit to 1 match for quicker response
+      );
+  
+      const unsubscribe = onSnapshot(q, async (snapshot) => {
+          if (!snapshot.empty) {
+              const match = snapshot.docs[0];
+              if (match.id !== user.uid) {  // Ensure not matching with self
+                  try {
+                      // Remove both users from the pool
+                      await removeFromMatchingPool(match.id);
+                      await removeFromMatchingPool(user.uid);
+  
+                      // Redirect to a shared game session
+                      setLoading(false);
+                      setSearchingUsers(prev => prev - 1);
+                      router.push(`/one-time-chat/${match.id}`);
+                  } catch (error) {
+                      console.error('Error handling match:', error);
+                  }
+              }
+          }
+      });
+  
+      // Cleanup listener on unmount
+      return () => {
+          unsubscribe();
+          if (user) {
+              removeFromMatchingPool(user.uid).catch(err => console.error('Error removing user on cleanup:', err));
+          }
+      };
+  }, [loading, user, karmaRange, router]);
+  
 
     useEffect(() => {
         const handleBeforeUnload = async () => {

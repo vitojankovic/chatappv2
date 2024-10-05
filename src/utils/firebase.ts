@@ -281,9 +281,15 @@ export async function addToMatchingPool(userId: string, karma: number) {
 }
 
 export async function removeFromMatchingPool(userId: string) {
-    const userRef = doc(db, 'matchingPool', userId);
-    await deleteDoc(userRef);
-    await decrementUsersSearchingCount();
+  const userRef = doc(db, 'matchingPool', userId);
+  await deleteDoc(userRef); // Remove the user from the matching pool
+
+  try {
+      // Ensure the decrement happens after removing the user
+      await decrementUsersSearchingCount(); 
+  } catch (error) {
+      console.error('Error decrementing user count:', error);
+  }
 }
 
 export async function findMatch(userId: string, karma: number): Promise<ProfileUser | null> {
