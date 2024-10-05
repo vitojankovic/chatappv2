@@ -8,6 +8,27 @@ body {
     font-family: 'Raleway', sans-serif; /* Use Raleway font everywhere */
   }
 
+
+  .mobile-menu {
+    transition: max-height 0.3s ease-in-out;
+    overflow: hidden;
+    max-height: 0; /* Start with height 0 */
+  }
+
+
+  
+  /* When the menu is open, set a max-height to a large enough value */
+  .mobile-menu.open {
+    max-height: 300px; /* Adjust this based on your content size */
+  }
+  
+  /* Align items and add spacing */
+  .mobile-menu .menu-item {
+    text-align: center; /* Center align the text */
+    padding: 1rem; /* Add padding for touch targets */
+    font-size: 1.25rem; /* Adjust font size for readability */
+  }
+
 /* Hide scrollbar for all elements */
 * {
   scrollbar-width: none;  /* Firefox */
@@ -25,9 +46,13 @@ body {
 
 html{
     background-color: #f1f1f1;
+    -webkit-font-smoothing: antialiased; 
+    -moz-osx-font-smoothing: grayscale;
 }
 html.dark {
     background-color: #111111;
+    -webkit-font-smoothing: antialiased; 
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .dark html{

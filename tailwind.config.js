@@ -77,7 +77,10 @@ module.exports = {
       },
       backgroundImage: {
         'waves': "url('src\components\wave.svg')"
-      }
+      },
+      screens: {
+        'xxs': '540px', // min-width
+      },
     },
   },
   plugins: [],

@@ -383,7 +383,7 @@ export default function OneTimeChat() {
       {user && chatState && user.uid === chatState.currentUser && (
         <button
           onClick={finishTurn}
-          className="bg-green-500 text-white px-4 py-2 rounded-lg mt-2"
+          className="bg-primary text-white px-4 py-2 rounded-[6px] mt-2"
         >
           I'm done with {chatState.stage === 'feedback' ? 'feedback' : 'my idea'}
         </button>
@@ -396,13 +396,13 @@ export default function OneTimeChat() {
             <p>The other user has proposed to end the chat. Do you accept?</p>
             <button
               onClick={() => respondToEndChatProposal(true)}
-              className="bg-green-500 text-white px-4 py-2 rounded-lg mr-2"
+              className="bg-light border-[2px] border-primary text-white px-4 py-2 rounded-[6px] mr-2"
             >
               Accept
             </button>
             <button
               onClick={() => respondToEndChatProposal(false)}
-              className="bg-red-500 text-white px-4 py-2 rounded-lg"
+              className="bg-light border-[2px] border-primary text-white px-4 py-2 rounded-lg"
             >
               Decline
             </button>
@@ -411,7 +411,7 @@ export default function OneTimeChat() {
       ) : (
         <button
           onClick={proposeEndChat}
-          className="bg-red-500 text-white px-4 py-2 rounded-lg mt-[10px]"
+          className="bg-light border-[2px] border-primary text-primary px-4 py-2 rounded-lg mt-[10px] flex px-4 py-2 mt-2"
         >
           Propose to End Chat
         </button>
@@ -432,7 +432,7 @@ export default function OneTimeChat() {
       ) : (
         <button
           onClick={leaveChat}
-          className="bg-red-500 text-white px-4 py-2 rounded-lg mt-4"
+          className="bg-red-500 text-white px-4 py-2 rounded-lg mt-4 ml-[62vw]"
         >
           Leave Chat (-5 Karma)
         </button>

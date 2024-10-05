@@ -3,12 +3,15 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
 import Logo from './mentforment (2).svg';
 
+
+
 const LandingPage = () => {
   const [userMessage, setUserMessage] = useState('');
   const [isInputDisabled, setIsInputDisabled] = useState(false);
   const [currentWord, setCurrentWord] = useState('product');
 
   const { scrollYProgress } = useScroll();
+
 
   const howItWorksRef = useRef(null);
   const coinFlipRef = useRef(null);
@@ -22,7 +25,7 @@ const LandingPage = () => {
     }, 250)
   }
 
-  const [isInputFilled, setIsInputFilled] = useState()
+  
 
 
   const ScrollIndicator = () => {
@@ -78,20 +81,64 @@ const LandingPage = () => {
     [0, 1]
   );
 
+  const buttonVariants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.3, ease: "easeInOut" }
+    }
+  };
+
+  const textVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.4, ease: "easeInOut" }
+    }
+  };
+
+  const inputVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { duration: 0.3, ease: "easeInOut" }
+    }
+  };
+
+  const fadeInVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { duration: 0.4, ease: "easeInOut" }
+    }
+  };
+  
+  
+  const slideVariants = {
+    hidden: { y: 500, opacity: 0 },
+    visible: { y: 50, opacity: 1 },
+    exit: { y: -20, opacity: 0 },
+  };
+
   return (
-    <div className="bg-light dark:bg-dark bg-[url('https://www.transparenttextures.com/patterns/otis-redding.png')]">
+    <div className="bg-light dark:bg-dark">
       {/* Hero Section */}
-      <section className="h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/otis-redding.png')]">
-        <h1 className="sm:text-2xl text-4xl md:text-6xl font-bold text-center mb-14 z-10 px-4">
-          Get instant feedback on your <br /><span className="bg-gradient-to-r from-primary to-pink-500 text-transparent bg-clip-text sm:text-3xl md:text-7xl text-6xl">{currentWord}</span>
-        </h1>
-        <motion.button
-          className="bg-primary text-white text-2xl font-bold py-4 px-8 rounded-lg z-10"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Find a Match
-        </motion.button>
+      <section className="h-screen flex flex-col items-center justify-center relative overflow-hidden ">
+        <motion.h1 className="sm:text-2xl text-4xl md:text-6xl font-bold text-center mb-14 z-10 px-4" variants={textVariants} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+          Get instant feedback on your <br /><motion.span className="bg-gradient-to-r from-primary to-pink-500 text-transparent bg-clip-text sm:text-3xl md:text-7xl text-6xl"
+          key={currentWord} // Change key to trigger exit/enter animation
+          variants={slideVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          transition={{ duration: 0.5 }} // Adjust duration for timing
+          >{currentWord}</motion.span>
+        </motion.h1>
+        <motion.button className="before:ease relative h-16 w-50 overflow-hidden border border-primary bg-primary text-white text-2xl font-bold py-4 px-8 shadow-2xl transition-all before:absolute before:right-0 before:top-0 before:h-16 before:w-6 before:translate-x-16 before:rotate-6 before:bg-white before:opacity-10 before:duration-700 hover:shadow-primary hover:before:-translate-x-40 z-20 rounded-[6px]">
+      <span className="relative z-20">Find a Match</span>
+    </motion.button>
 
         {/* Fixed blob */}
         <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="sm:w-[2000px] sm:h-[2000px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 md:w-[100vw] md:h-[100vh] min-w-[500px] z-0 dark:fill-daccent fill-laccent">
@@ -121,7 +168,8 @@ const LandingPage = () => {
           <div className="absolute top-1/2 left-3/4 w-32 h-1 bg-tertiary opacity-20 transform -rotate-45"></div>
         </motion.div>
 
-        <h1 className="text-daccent dark:text-laccent text-2xl font-bold z-10 absolute bottom-[15vh]">This is how it works</h1>
+        <motion.h1 className="text-daccent dark:text-laccent text-2xl font-bold z-10 absolute bottom-[15vh]"
+        variants={textVariants} initial="hidden" whileInView="visible" viewport={{ once: true }}>This is how it works</motion.h1>
         <ScrollIndicator />
       </section>
 
@@ -228,63 +276,75 @@ const LandingPage = () => {
       </section>  
 
       {/* Coin Flip Section */}
-      <section ref={coinFlipRef} className="relative bg-laccent dark:bg-daccent h-[300vh] bg-">
-        <div className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/graphy.png')]">
-          <motion.h2 
-            className="text-6xl font-bold mb-10 text-dark dark:text-light"
-            style={{
-              opacity: useTransform(coinFlipProgress, [0, 0.1, 0.6, 1], [1, 1, 1, 1]),
-            }}
-          >
-          {useTransform(coinFlipProgress, [0, 0.9, 1], ["Then we flip a coin", "Then we flip a coin", "You go first!"])}
-          </motion.h2>
+      <section 
+  ref={coinFlipRef} 
+  className="relative bg-laccent dark:bg-daccent h-[300vh] bg-gradient-to-b from-laccent to-daccent"
+>
+  <div className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/graphy.png')] bg-opacity-50">
+    
+    {/* Heading with shadow */}
+    <motion.h2 
+      className="text-6xl font-bold mb-10 text-dark dark:text-light drop-shadow-lg"
+      style={{
+        opacity: useTransform(coinFlipProgress, [0, 0.1, 0.6, 1], [1, 1, 1, 1]),
+      }}
+    >
+      {useTransform(coinFlipProgress, [0, 0.9, 1], ["Then we flip a coin", "Then we flip a coin", "You go first!"])}
+    </motion.h2>
 
-          <motion.div
-            className="w-[40vh] h-[40vh] mb-8 "
-            style={{
-              rotateX: useTransform(coinFlipProgress, [0.5, 1], [0, 360]), // 4 full rotations
-            }}
-          >
-            <Image 
-              src={Logo} 
-              alt="Coin" 
-              width={800} 
-              height={800} 
-              className="dark:invert"
-            />
-          </motion.div>
-        </div>
-      </section>
+    {/* Coin with shadow and smoother animation */}
+    <motion.div
+      className="w-[40vh] h-[40vh] mb-8 shadow-xl rounded-full transition-transform ease-out duration-700"
+      style={{
+        rotate: useTransform(coinFlipProgress, [0.5, 1], [0, 1440]), // 4 full rotations
+      }}
+    >
+      <Image 
+        src={Logo} 
+        alt="Coin" 
+        width={800} 
+        height={800} 
+        className="dark:invert"
+      />
+    </motion.div>
+    
+  </div>
+</section>
 
       {/* User Input Section */}
       <section className="h-[100vh] flex flex-col items-center justify-center bg-laccent dark:bg-daccent relative bg-[url('https://www.transparenttextures.com/patterns/graphy.png')]">
-        <h2 className="text-3xl font-bold mb-4 text-dark dark:text-light">
+        <motion.h2 className="text-3xl font-bold mb-4 text-dark dark:text-light" 
+        variants={textVariants} initial="hidden" whileInView="visible" viewport={{ once: true }}>
           {isInputDisabled ? "And now you wait for feedback on the other side" : "Write what you need help with"}
-        </h2>
-        <textarea
+        </motion.h2>
+        <motion.textarea
           className={`w-11/12 h-1/4 p-6 text-2xl border-[4px] border-dark rounded-[6px] ${
             isInputDisabled ? 'bg-red-100' : 'bg-laccent'
           } dark:bg-daccent dark:border-[4px] dark:border-light dark:border-opacity-5 border-opacity-5 focus:outline-none focus:ring-2 focus:ring-primary placeholder-dark dark:placeholder-light z-10`}
           placeholder="Enter your message here..."
           value={userMessage}
           disabled={isInputDisabled}
+          variants={inputVariants} initial="hidden" whileInView="visible" viewport={{ once: true }}
           style={{ fontSize: '1.5rem' }}
           onChange={(e) => {
             setUserMessage(e.target.value);
           }}
         />
         <motion.button
+          data-modal-target="default-modal" data-modal-toggle="default-modal"
           className="mt-8 bg-primary text-white text-2xl font-bold py-4 px-8 rounded-lg shadow-lg hover:bg-primarylight transition duration-300 ease-in-out z-10"
+          variants={buttonVariants} initial="hidden" whileInView="visible" viewport={{ once: true }}
           onClick={() => {
             setIsInputDisabled(true);
-            // We don't clear the message immediately to allow for a smooth transition
-            scrollDown()
+
           }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
           {isInputDisabled ? "Waiting for feedback..." : "I'm done"}
         </motion.button>
+
+        
 
         <motion.div
           className="absolute inset-0 z-0"
@@ -295,23 +355,9 @@ const LandingPage = () => {
         />
       </section>
 
-
-      <section className="min-h-screen bg-laccent dark:bg-daccent flex flex-col justify-center items-center text-center relative bg-[url('https://www.transparenttextures.com/patterns/graphy.png')]">
-      <h1 className="text-6xl pt-20 mb-6">
-        Now you are ready to{' '}
-        <span className="bg-gradient-to-r from-primary to-pink-500 text-transparent bg-clip-text">
-          play
-        </span>
-      </h1>
-
-      <motion.button
-        className="bg-primary text-white text-2xl font-bold py-4 px-8 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        Find a Match
-      </motion.button>
-    </section>
+      <motion.div id="default-modal" aria-hidden="true" className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <h1 className="text-9xl">Hey guys</h1>
+      </motion.div>
 
       
 
@@ -325,7 +371,7 @@ const LandingPage = () => {
             <a href="#" className="hover:underline hover:text-primarylight dark:hover:text-laccent">About</a>
           </li>
           <li className="mb-4">
-            <a href="#" className="hover:underline hover:text-primarylight dark:hover:text-laccent">Careers</a>
+            <a href="/contributors" className="hover:underline hover:text-primarylight dark:hover:text-laccent">Contributors</a>
           </li>
           <li className="mb-4">
             <a href="#" className="hover:underline hover:text-primarylight dark:hover:text-laccent">Brand Center</a>

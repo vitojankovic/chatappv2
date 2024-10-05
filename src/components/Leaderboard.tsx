@@ -45,7 +45,7 @@ export default function Leaderboard() {
 
   return (
     <div className="fixed inset-0 flex justify-center items-center mt-[-40px]">
-    <div className="bg-laccent container h-[70vh] w-full max-w-4xl border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light dark:border-opacity-5 border-opacity-5 transition-colors duration-800 ease-out p-6 rounded-lg shadow-lightshadow dark:shadow-lightshadow overflow-hidden">
+    <div className="bg-laccent container h-[70vh] md:w-full w-[90vw] max-w-4xl border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light dark:border-opacity-5 border-opacity-5 transition-colors duration-800 ease-out p-6 rounded-lg shadow-lightshadow dark:shadow-lightshadow overflow-hidden">
       
       <div className="sticky top-0 bg-laccent dark:bg-daccent z-10 pb-4">
         <div className="flex justify-between items-center">

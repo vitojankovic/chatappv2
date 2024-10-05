@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Contributors = () => {
-  const usernames = ['Josh', 'Jamal', 'Jake']; // Placeholder usernames
+  const usernames = ['@jahidgaming8611']; 
 
   return (
     <div>

@@ -76,7 +76,7 @@ export default function FindMatch() {
             if (user) {
                 await removeFromMatchingPool(user.uid);
             }
-            setSearchingUsers(prev => Math.max(0, prev - 1));
+            setSearchingUsers(prev => Math.max(0, prev));
             setLoading(false);
         }
     };
@@ -159,7 +159,7 @@ export default function FindMatch() {
 
     return (
 <div className="flex justify-center items-center min-h-screen">
-  <div className="bg-laccent dark:bg-daccent border-[4px] border-dark rounded-[8px] dark:border-light border-opacity-5 dark:border-opacity-5 transition-colors duration-800 ease-out p-6 shadow-lightshadow dark:shadow-darkshadow md:max-w-xl w-full sm:w-[90%] md:w-[80%]">
+  <div className="bg-laccent dark:bg-daccent border-[4px] border-dark rounded-[8px] dark:border-light border-opacity-5 dark:border-opacity-5 transition-colors duration-800 ease-out p-6 shadow-lightshadow dark:shadow-darkshadow md:max-w-xl w-full sm:w-[90%] md:w-[80%] w-[90vw]">
     <div className="mt-[50px] flex flex-col items-center justify-center text-center px-4">
       <h2 className="text-4xl font-bold mb-8 text-dark dark:text-light">
         Ready for a battle?
