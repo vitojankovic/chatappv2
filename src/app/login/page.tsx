@@ -5,18 +5,20 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import myAnimation from './login-animationtwo.gif';
 import { loginUser } from '../../utils/firebase'; // Import the loginUser function
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
+  const { user } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await loginUser(email, password); // Use the loginUser function
-      router.push('/profile');
+      router.push(`/${user?.username}`);
     } catch (error: unknown) {
       if (error instanceof Error) {
         setError(error.message);

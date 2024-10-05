@@ -9,7 +9,7 @@ module.exports = {
 
 
 
-        light: '#FDF5E6',
+        /*light: '#FDF5E6',
         dark: '#424242',
         laccent: '#FFCCBC',
         daccent: '#F57C00',
@@ -20,7 +20,7 @@ module.exports = {
         successcolor: '#66BB6A',
         warningcolor: '#FFEE58',
         errorcolor: '#EF5350',
-        infocolor: '#42A5F5'
+        infocolor: '#42A5F5'*/
         
 
         /*light: '#F9F9F9',
@@ -57,19 +57,18 @@ module.exports = {
 
 
 
-
-        /*light: '#f1f1f1', 
-        dark: '#111111',
+        light: '#f1f1f1', 
+        dark: '#2C2C2E',       // Softer dark tone, less harsh than #111111
         laccent: '#EAE7E4',
-        daccent: '#413B3B',  
+        daccent: '#4B4B4D',    // Warmer, slightly lighter accent for balance
         primary: '#191970',
         primarylight: '#7373C8',
         lightshadow: 'rgba(0, 0, 0, 0.1)',
         darkshadow: 'rgba(255, 255, 255, 0.1)',
         successcolor: '#28a745',
-        warningcolor: '##ffc107',
+        warningcolor: '#ffc107',  // Fixed double hash issue
         errorcolor: '#dc2626',
-        infocolor: '#17a2b8',*/
+        infocolor: '#17a2b8'
 
         /*light: '#D0E8F2',
         dark: '#0B3D6A',

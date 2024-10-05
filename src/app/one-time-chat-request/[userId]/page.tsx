@@ -39,7 +39,7 @@ export default function OneTimeChatRequestPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 mt-[100px]">
       <h1 className="text-2xl font-bold mb-4">Send One-Time Chat Request</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -48,14 +48,14 @@ export default function OneTimeChatRequestPage() {
             id="message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded flex-grow mr-2 p-3 bg-laccent border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light border-opacity-5  focus:outline-none focus:ring-2 focus:ring-primary placeholder-dark dark:placeholder-light text-lg w-[calc(100%-57px)]"
             placeholder="Enter a message for your request..."
           />
         </div>
         {error && <p className="text-red-500">{error}</p>}
         <button 
           type="submit" 
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className="bg-primary mx-auto text-white px-4 py-2 rounded"
           disabled={loading}
         >
           {loading ? 'Sending...' : 'Send Request'}

@@ -333,8 +333,7 @@ export default function OneTimeChat() {
       <div className="bg-laccent border-[4px] border-dark rounded-[6px] dark:bg-daccent dark:border-[4px] dark:border-light dark:border-opacity-5 border-opacity-5 p-4 h-[calc(100vh-20rem)] flex flex-col mb-4">
         <p className="mb-4 text-lg">
           {isCurrentUserTurn ? "It's your turn" : "Waiting for the other user"}
-          {" - "}
-          {chatState.stage === 'feedback' ? 'Provide feedback' : 'Present your idea'}
+          {""}
         </p>
         {!chatState.secondUser && (
           <p className="mb-4 text-yellow-600">Waiting for another user to join...</p>
@@ -396,13 +395,13 @@ export default function OneTimeChat() {
             <p>The other user has proposed to end the chat. Do you accept?</p>
             <button
               onClick={() => respondToEndChatProposal(true)}
-              className="bg-light border-[2px] border-primary text-white px-4 py-2 rounded-[6px] mr-2"
+              className="bg-primary border-[2px] border-primary text-light px-4 py-2 rounded-[6px] mr-2"
             >
               Accept
             </button>
             <button
               onClick={() => respondToEndChatProposal(false)}
-              className="bg-light border-[2px] border-primary text-white px-4 py-2 rounded-lg"
+              className="bg-light border-[2px] border-primary text-primary px-4 py-2 rounded-lg"
             >
               Decline
             </button>

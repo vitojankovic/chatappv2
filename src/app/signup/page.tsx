@@ -17,7 +17,8 @@ export default function SignupPage() {
     e.preventDefault();
     try {
       await registerUser(email, password, username); // Use the registerUser function
-      router.push('/profile');
+      const route = '/' + username
+      router.push(route);
     } catch (error: unknown) {
       if (error instanceof Error) {
         setError(error.message);
